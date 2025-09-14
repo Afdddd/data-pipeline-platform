@@ -3,7 +3,6 @@ package com.core.data_pipeline_platform.domain.file.service;
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
-import com.core.data_pipeline_platform.domain.file.validator.FileValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -140,5 +141,83 @@ class FileUploadServiceTest {
             .isInstanceOf(ResponseStatusException.class)
             .extracting(ex -> ((ResponseStatusException) ex).getReason())
             .isEqualTo("지원하지 않는 형식입니다.");
+    }
+
+    @Test
+    @DisplayName("DB 제약 조건 위반 - CONFLICT 예외발생")
+    void uploadFile_DataIntegrityViolation_ThrowsConflict() {
+        // Given
+        given(fileRepository.existsByOriginName("test.json"))
+                .willReturn(false);
+
+        FileEntity storageEntity = FileEntity.builder()
+                .fileType(FileType.JSON)
+                .originName("test.json")
+                .directoryName("uuid-directory")
+                .storedName("uuid-storedName")
+                .build();
+
+        given(fileStorageService.storeFile(mockFile, FileType.JSON))
+                .willReturn(storageEntity);
+
+        given(fileRepository.save(storageEntity))
+                .willThrow(new DataIntegrityViolationException("UNIQUE constraint violation"));
+
+        // When & Then
+        assertThatThrownBy(() -> fileUploadService.uploadFile(mockFile))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException responseEx = (ResponseStatusException) ex;
+                    assertThat(responseEx.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(responseEx.getReason()).isEqualTo("이미 존재하는 파일 이름입니다.");
+                });
+
+        then(fileRepository).should().existsByOriginName("test.json");
+        then(fileStorageService).should().storeFile(mockFile, FileType.JSON);
+        then(fileRepository).should().save(storageEntity);
+
+    }
+
+    @Test
+    @DisplayName("Pre-check와 DB 제약조건 모두 통과 - 정상 처리")
+    void uploadFile_NoRaceCondition_Success() {
+        // Given
+        given(fileRepository.existsByOriginName("unique.json"))
+                .willReturn(false);
+
+        FileEntity storageEntity = FileEntity.builder()
+                .fileType(FileType.JSON)
+                .originName("unique")
+                .directoryName("uuid-directory")
+                .storedName("uuid-stored")
+                .build();
+
+        given(fileStorageService.storeFile(any(), eq(FileType.JSON)))
+                .willReturn(storageEntity);
+
+        FileEntity savedEntity = FileEntity.builder()
+                .id(1L)
+                .fileType(FileType.JSON)
+                .originName("unique")
+                .directoryName("uuid-directory")
+                .storedName("uuid-stored")
+                .build();
+
+        given(fileRepository.save(storageEntity))
+                .willReturn(savedEntity);  // DB 제약조건도 통과
+
+        MultipartFile uniqueFile = new MockMultipartFile(
+                "file", "unique.json", "application/json", "content".getBytes()
+        );
+
+        // When
+        Long result = fileUploadService.uploadFile(uniqueFile);
+
+        // Then
+        assertThat(result).isEqualTo(1L);
+
+        then(fileRepository).should().existsByOriginName("unique.json");
+        then(fileStorageService).should().storeFile(any(), eq(FileType.JSON));
+        then(fileRepository).should().save(storageEntity);
     }
 }
