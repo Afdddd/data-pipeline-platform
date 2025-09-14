@@ -24,7 +24,7 @@ public class FileStorageService {
     public FileEntity storeFile(MultipartFile file, FileType fileType) {
         String directoryName = UUID.randomUUID().toString();
         String storedName = UUID.randomUUID().toString();
-        String originName = file.getOriginalFilename().substring(0, file.getOriginalFilename().lastIndexOf("."));
+        String originName = file.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir, fileType.getExtension(), directoryName);
 
         try {
@@ -33,7 +33,7 @@ public class FileStorageService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "디렉토리 생성 실패");
         }
 
-        Path targetLocation = uploadPath.resolve(storedName+"."+ fileType.getDescription());
+        Path targetLocation = uploadPath.resolve(storedName+"."+ fileType.getExtension());
 
         try {
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);

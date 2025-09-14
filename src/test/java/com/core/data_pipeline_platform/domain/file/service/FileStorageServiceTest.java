@@ -54,7 +54,7 @@ class FileStorageServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getOriginName()).isEqualTo("test");
+        assertThat(result.getOriginName()).isEqualTo("test.json");
         assertThat(result.getFileType()).isEqualTo(FileType.JSON);
         assertThat(result.getStoredName()).isNotNull();
         assertThat(result.getDirectoryName()).isNotNull();
@@ -64,7 +64,7 @@ class FileStorageServiceTest {
             tempDir.toString(), 
             fileType.getExtension(), 
             result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getDescription()
+            result.getStoredName() + "." + fileType.getExtension()
         );
         assertThat(Files.exists(expectedPath)).isTrue();
         
@@ -91,7 +91,7 @@ class FileStorageServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getOriginName()).isEqualTo("users");
+        assertThat(result.getOriginName()).isEqualTo("users.csv");
         assertThat(result.getFileType()).isEqualTo(FileType.CSV);
         
         // 디렉토리 구조 확인: uploads/csv/uuid/
@@ -99,7 +99,7 @@ class FileStorageServiceTest {
             tempDir.toString(),
             "csv",
             result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getDescription()
+            result.getStoredName() + "." + fileType.getExtension()
         );
         assertThat(Files.exists(expectedPath)).isTrue();
     }
@@ -122,7 +122,7 @@ class FileStorageServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getOriginName()).isEqualTo("data");
+        assertThat(result.getOriginName()).isEqualTo("data.xml");
         assertThat(result.getFileType()).isEqualTo(FileType.XML);
         
         // 파일이 올바른 위치에 저장되었는지 확인
@@ -130,27 +130,10 @@ class FileStorageServiceTest {
             tempDir.toString(),
             "xml",
             result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getDescription()
+            result.getStoredName() + "." + fileType.getExtension()
         );
         assertThat(Files.exists(expectedPath)).isTrue();
         assertThat(Files.readString(expectedPath)).isEqualTo(content);
-    }
-
-    @Test
-    @DisplayName("파일명에 확장자가 없는 경우 - 예외 발생")
-    void storeFile_NoExtension_ThrowsException() {
-        // Given
-        MultipartFile file = new MockMultipartFile(
-            "file",
-            "filename_without_extension",
-            "application/octet-stream",
-            "content".getBytes()
-        );
-        FileType fileType = FileType.BIN;
-
-        // When & Then
-        assertThatThrownBy(() -> fileStorageService.storeFile(file, fileType))
-            .isInstanceOf(StringIndexOutOfBoundsException.class);
     }
 
     @Test
@@ -170,14 +153,14 @@ class FileStorageServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getOriginName()).isEqualTo("empty");
+        assertThat(result.getOriginName()).isEqualTo("empty.json");
         
         // 빈 파일도 생성되는지 확인
         Path expectedPath = Paths.get(
             tempDir.toString(),
             fileType.getExtension(),
             result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getDescription()
+            result.getStoredName() + "." + fileType.getExtension()
         );
         assertThat(Files.exists(expectedPath)).isTrue();
         assertThat(Files.size(expectedPath)).isEqualTo(0);
@@ -247,7 +230,7 @@ class FileStorageServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getOriginName()).isEqualTo("테스트-파일_#1");
+        assertThat(result.getOriginName()).isEqualTo("테스트-파일_#1.json");
         assertThat(result.getFileType()).isEqualTo(FileType.JSON);
     }
 }

@@ -22,12 +22,12 @@ public class FileEntity {
     @Enumerated(EnumType.STRING)
     private FileType fileType;
 
-    @Column(name = "origin_name", nullable = false, length = 100)
+    @Column(name = "origin_name", nullable = false, length = 255, unique = true)
     private String originName;
 
     @Column(name = "directory_name", nullable = false)
     private String directoryName;
 
-    @Column(name = "stored_name", nullable = false, length = 100)
+    @Column(name = "stored_name", nullable = false, length = 255)
     private String storedName;
 }
