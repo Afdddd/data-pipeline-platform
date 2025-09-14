@@ -12,6 +12,17 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB      
+      max-request-size: 50MB
+      enabled: true         
+
+# 애플리케이션 설정
+app:
+  file:
+    max-size: 10485760  # 10MB in bytes
+    upload-dir: ./uploads  # 파일 저장 경로
 
 # Logging
 logging:
