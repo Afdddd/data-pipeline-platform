@@ -2,6 +2,7 @@ package com.core.data_pipeline_platform.domain.file.service;
 
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,7 +10,6 @@ import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +22,14 @@ public class FileUploadService {
         String fileName = file.getOriginalFilename();
         FileType fileType = validateAndGetFileType(fileName);
         validateDuplicateFileName(fileName);
-        FileEntity fileEntity = fileStorageService.storeFile(file, fileType);
-        FileEntity savedEntity = fileRepository.save(fileEntity);
-        return savedEntity.getId();
+        
+        try{
+            FileEntity fileEntity = fileStorageService.storeFile(file, fileType);
+            FileEntity savedEntity = fileRepository.save(fileEntity);
+            return savedEntity.getId();
+        }catch(DataIntegrityViolationException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
+        }
     }
 
 
