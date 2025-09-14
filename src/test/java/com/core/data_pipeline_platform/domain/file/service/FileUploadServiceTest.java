@@ -55,7 +55,7 @@ class FileUploadServiceTest {
         
         FileEntity storageEntity = FileEntity.builder()
             .fileType(FileType.JSON)
-            .originName("test")
+            .originName("test.json")
             .directoryName("uuid-directory")
             .storedName("uuid-stored")
             .build();
@@ -66,7 +66,7 @@ class FileUploadServiceTest {
         FileEntity savedEntity = FileEntity.builder()
             .id(1L)
             .fileType(FileType.JSON)
-            .originName("test")
+            .originName("test.json")
             .directoryName("uuid-directory")
             .storedName("uuid-stored")
             .build();
@@ -187,7 +187,7 @@ class FileUploadServiceTest {
 
         FileEntity storageEntity = FileEntity.builder()
                 .fileType(FileType.JSON)
-                .originName("unique")
+                .originName("unique.json")
                 .directoryName("uuid-directory")
                 .storedName("uuid-stored")
                 .build();
@@ -198,7 +198,7 @@ class FileUploadServiceTest {
         FileEntity savedEntity = FileEntity.builder()
                 .id(1L)
                 .fileType(FileType.JSON)
-                .originName("unique")
+                .originName("unique.json")
                 .directoryName("uuid-directory")
                 .storedName("uuid-stored")
                 .build();

@@ -10,8 +10,11 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class FileValidator {
 
-    @Value("${spring.servlet.multipart.max-file-size}")
-    private DataSize maxFileSize;
+    private final DataSize maxFileSize;
+
+    public FileValidator(@Value("${spring.servlet.multipart.max-file-size}") DataSize maxFileSize){
+        this.maxFileSize = maxFileSize;
+    }
     
     /**
      * 파일 업로드 기본 검증
