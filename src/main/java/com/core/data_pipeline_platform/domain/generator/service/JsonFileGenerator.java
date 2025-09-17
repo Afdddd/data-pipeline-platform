@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class JsonFileGenerator {
     public byte[] generatorFile(GenerateRequest request) {
         List<SensorData> sensorDataList = new ArrayList<>();
 
-        for (int i = 0; i < request.recordCound(); i++) {
+        for (int i = 0; i < request.recordCount(); i++) {
             sensorDataList.add(SensorData.builder()
                     .sensorId("SENSOR_"+i)
                     .value(Math.random()*100)
@@ -33,8 +32,7 @@ public class JsonFileGenerator {
         }
 
         try{
-            String json = objectMapper.writeValueAsString(sensorDataList);
-            return json.getBytes(StandardCharsets.UTF_8);
+            return objectMapper.writeValueAsBytes(sensorDataList);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON 생성 실패", e);
         }
