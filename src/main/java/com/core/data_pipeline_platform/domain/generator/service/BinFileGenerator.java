@@ -27,8 +27,9 @@ import java.time.LocalDateTime;
  * └── status data (UTF-8): variable
  */
 @Component
-public class BinFileGenerator {
+public class BinFileGenerator implements FileGenerator{
 
+    @Override
     public byte[] generatorFile(GenerateRequest request) {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
              DataOutputStream dataStream = new DataOutputStream(byteStream)) {

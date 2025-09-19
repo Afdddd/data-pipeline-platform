@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class JsonFileGenerator {
+public class JsonFileGenerator implements FileGenerator{
 
     private final ObjectMapper objectMapper;
 
@@ -19,6 +19,7 @@ public class JsonFileGenerator {
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public byte[] generatorFile(GenerateRequest request) {
         List<SensorData> sensorDataList = new ArrayList<>();
 

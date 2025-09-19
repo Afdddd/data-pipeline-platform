@@ -7,8 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Component
-public class XmlFileGenerator {
+public class XmlFileGenerator implements FileGenerator{
 
+    @Override
     public byte[] generatorFile(GenerateRequest request) {
         StringBuilder xmlBuilder = new StringBuilder();
 

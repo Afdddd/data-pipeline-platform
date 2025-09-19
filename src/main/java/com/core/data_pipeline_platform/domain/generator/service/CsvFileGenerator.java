@@ -9,8 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Component
-public class CsvFileGenerator {
+public class CsvFileGenerator implements FileGenerator{
 
+    @Override
     public byte[] generatorFile(GenerateRequest request) {
 
         StringBuilder csvBuilder = new StringBuilder();
