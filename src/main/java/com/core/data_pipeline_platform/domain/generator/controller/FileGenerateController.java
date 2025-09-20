@@ -3,6 +3,7 @@ package com.core.data_pipeline_platform.domain.generator.controller;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
 import com.core.data_pipeline_platform.domain.generator.service.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,8 @@ public class FileGenerateController {
     private final BinFileGenerator binFileGenerator;
 
     @PostMapping(value = "/{format}")
-    public ResponseEntity<byte[]> generateFile(@PathVariable String format, @RequestBody GenerateRequest request ){
+    public ResponseEntity<byte[]> generateFile(@PathVariable String format,
+                                               @RequestBody @Valid GenerateRequest request ){
         FileGenerator fileGenerator = getGenerator(format);
         byte[] content = fileGenerator.generatorFile(request);
         String mimeType = getMimeType(format);
