@@ -6,8 +6,12 @@ import com.core.data_pipeline_platform.domain.generator.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Locale;
 
 @RestController
 @RequestMapping("api/generate")
@@ -35,12 +39,13 @@ public class FileGenerateController {
     }
 
     private FileGenerator getGenerator(String format){
-        return switch(format) {
+        String f = format.toLowerCase();
+        return switch(f) {
             case "json" -> jsonFileGenerator;
             case "csv" -> csvFileGenerator;
             case "xml" -> xmlFileGenerator;
             case "bin" -> binFileGenerator;
-            default -> throw new IllegalArgumentException("Unsupported format: " + format);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 형식입니다. "+"["+format+"]");
         };
     }
 
