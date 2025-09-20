@@ -31,7 +31,7 @@ class JsonFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 5);
 
         // When
-        byte[] result = jsonFileGenerator.generatorFile(request);
+        byte[] result = jsonFileGenerator.generateFile(request);
 
         // Then
         assertNotNull(result);
@@ -45,7 +45,7 @@ class JsonFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = jsonFileGenerator.generatorFile(request);
+        byte[] result = jsonFileGenerator.generateFile(request);
 
         // Then
         String jsonString = new String(result, StandardCharsets.UTF_8);

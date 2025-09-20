@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Locale;
-
 @RestController
 @RequestMapping("api/generate")
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class FileGenerateController {
     public ResponseEntity<byte[]> generateFile(@PathVariable String format,
                                                @RequestBody @Valid GenerateRequest request ){
         FileGenerator fileGenerator = getGenerator(format);
-        byte[] content = fileGenerator.generatorFile(request);
+        byte[] content = fileGenerator.generateFile(request);
         String mimeType = getMimeType(format);
 
         return ResponseEntity.ok()

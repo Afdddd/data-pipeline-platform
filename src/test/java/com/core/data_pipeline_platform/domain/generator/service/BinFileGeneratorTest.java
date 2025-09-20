@@ -33,7 +33,7 @@ class BinFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = binFileGenerator.generatorFile(request);
+        byte[] result = binFileGenerator.generateFile(request);
 
         // Then
         assertNotNull(result, "결과가 null이 아니어야 함");
@@ -53,7 +53,7 @@ class BinFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", expectedRecordCount);
 
         // When
-        byte[] result = binFileGenerator.generatorFile(request);
+        byte[] result = binFileGenerator.generateFile(request);
 
         // Then
         try (ByteArrayInputStream byteStream = new ByteArrayInputStream(result);
@@ -73,7 +73,7 @@ class BinFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 2);
 
         // When
-        byte[] result = binFileGenerator.generatorFile(request);
+        byte[] result = binFileGenerator.generateFile(request);
 
         // Then
         try (ByteArrayInputStream byteStream = new ByteArrayInputStream(result);
@@ -108,7 +108,7 @@ class BinFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 1);
 
         // When
-        byte[] result = binFileGenerator.generatorFile(request);
+        byte[] result = binFileGenerator.generateFile(request);
 
         // Then
         try (ByteArrayInputStream byteStream = new ByteArrayInputStream(result);

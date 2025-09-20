@@ -140,13 +140,13 @@ class FileGenerateControllerTest {
     // Helper 메서드들
     private void setupMockForFormat(String format) {
         switch (format) {
-            case "json" -> Mockito.when(jsonFileGenerator.generatorFile(any(GenerateRequest.class)))
+            case "json" -> Mockito.when(jsonFileGenerator.generateFile(any(GenerateRequest.class)))
                     .thenReturn(testContent);
-            case "csv" -> Mockito.when(csvFileGenerator.generatorFile(any(GenerateRequest.class)))
+            case "csv" -> Mockito.when(csvFileGenerator.generateFile(any(GenerateRequest.class)))
                     .thenReturn(testContent);
-            case "xml" -> Mockito.when(xmlFileGenerator.generatorFile(any(GenerateRequest.class)))
+            case "xml" -> Mockito.when(xmlFileGenerator.generateFile(any(GenerateRequest.class)))
                     .thenReturn(testContent);
-            case "bin" -> Mockito.when(binFileGenerator.generatorFile(any(GenerateRequest.class)))
+            case "bin" -> Mockito.when(binFileGenerator.generateFile(any(GenerateRequest.class)))
                     .thenReturn(testContent);
         }
     }

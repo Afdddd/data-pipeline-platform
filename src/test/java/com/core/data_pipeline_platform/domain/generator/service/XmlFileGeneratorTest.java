@@ -35,7 +35,7 @@ class XmlFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = xmlFileGenerator.generatorFile(request);
+        byte[] result = xmlFileGenerator.generateFile(request);
 
         // Then
         assertNotNull(result, "결과가 null이 아니어야 함");
@@ -52,7 +52,7 @@ class XmlFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 2);
 
         // When
-        byte[] result = xmlFileGenerator.generatorFile(request);
+        byte[] result = xmlFileGenerator.generateFile(request);
 
         // Then
         String xmlString = new String(result, StandardCharsets.UTF_8);
@@ -74,7 +74,7 @@ class XmlFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = xmlFileGenerator.generatorFile(request);
+        byte[] result = xmlFileGenerator.generateFile(request);
 
         // Then
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -112,7 +112,7 @@ class XmlFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 1);
 
         // When
-        byte[] result = xmlFileGenerator.generatorFile(request);
+        byte[] result = xmlFileGenerator.generateFile(request);
 
         // Then
         String xmlString = new String(result, StandardCharsets.UTF_8);

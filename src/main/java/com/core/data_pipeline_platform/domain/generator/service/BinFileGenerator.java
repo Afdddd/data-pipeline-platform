@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 public class BinFileGenerator implements FileGenerator{
 
     @Override
-    public byte[] generatorFile(GenerateRequest request) {
+    public byte[] generateFile(GenerateRequest request) {
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
              DataOutputStream dataStream = new DataOutputStream(byteStream)) {
             

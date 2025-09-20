@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class XmlFileGenerator implements FileGenerator{
 
     @Override
-    public byte[] generatorFile(GenerateRequest request) {
+    public byte[] generateFile(GenerateRequest request) {
         StringBuilder xmlBuilder = new StringBuilder();
 
         // XML 선언부

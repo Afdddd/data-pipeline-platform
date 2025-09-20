@@ -20,7 +20,7 @@ public class JsonFileGenerator implements FileGenerator{
     }
 
     @Override
-    public byte[] generatorFile(GenerateRequest request) {
+    public byte[] generateFile(GenerateRequest request) {
         List<SensorData> sensorDataList = new ArrayList<>();
 
         for (int i = 0; i < request.recordCount(); i++) {

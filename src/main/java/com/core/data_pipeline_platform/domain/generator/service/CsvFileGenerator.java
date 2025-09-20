@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class CsvFileGenerator implements FileGenerator{
 
     @Override
-    public byte[] generatorFile(GenerateRequest request) {
+    public byte[] generateFile(GenerateRequest request) {
 
         StringBuilder csvBuilder = new StringBuilder();
         Field[] fields = SensorData.class.getDeclaredFields();

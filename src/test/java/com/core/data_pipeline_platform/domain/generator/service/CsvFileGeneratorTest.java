@@ -29,7 +29,7 @@ class CsvFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = csvFileGenerator.generatorFile(request);
+        byte[] result = csvFileGenerator.generateFile(request);
 
         // Then
         assertNotNull(result, "결과가 null이 아니어야 함");
@@ -46,7 +46,7 @@ class CsvFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 1);
 
         // When
-        byte[] result = csvFileGenerator.generatorFile(request);
+        byte[] result = csvFileGenerator.generateFile(request);
 
         // Then
         String csvString = new String(result, StandardCharsets.UTF_8);
@@ -69,7 +69,7 @@ class CsvFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", expectedRecordCount);
 
         // When
-        byte[] result = csvFileGenerator.generatorFile(request);
+        byte[] result = csvFileGenerator.generateFile(request);
 
         // Then
         String csvString = new String(result, StandardCharsets.UTF_8);
@@ -88,7 +88,7 @@ class CsvFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 2);
 
         // When
-        byte[] result = csvFileGenerator.generatorFile(request);
+        byte[] result = csvFileGenerator.generateFile(request);
 
         // Then
         String csvString = new String(result, StandardCharsets.UTF_8);
@@ -115,7 +115,7 @@ class CsvFileGeneratorTest {
         GenerateRequest request = new GenerateRequest("test", 3);
 
         // When
-        byte[] result = csvFileGenerator.generatorFile(request);
+        byte[] result = csvFileGenerator.generateFile(request);
 
         // Then
         String csvString = new String(result, StandardCharsets.UTF_8);
