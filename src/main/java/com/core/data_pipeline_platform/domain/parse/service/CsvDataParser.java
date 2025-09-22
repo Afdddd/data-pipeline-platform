@@ -37,11 +37,12 @@ public class CsvDataParser implements DataParser{
         if (headerLine == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CSV 파일이 비어있습니다.");
         }
-        String[] headers = headerLine.split(",");
+        String regex = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+        String[] headers = headerLine.split(regex, -1);
 
         String line;
         while ((line = reader.readLine()) != null) {
-            String[] columns = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+            String[] columns = line.split(regex, -1);
             for (int i = 0; i < columns.length; i++) {
                 if (columns[i].startsWith("\"") && columns[i].endsWith("\"")) {
                     columns[i] = columns[i].substring(1, columns[i].length() - 1);
