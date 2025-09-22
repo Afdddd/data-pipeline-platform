@@ -22,10 +22,18 @@ public class JsonDataParser implements DataParser {
     @Override
     public List<Map<String, Object>> parseData(FileType fileType, InputStream inputStream) {
 
+        if (fileType != FileType.JSON) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일 타입 불일치: JSON이어야 합니다.");
+        }
+
+        if (inputStream == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "입력 스트림이 null 입니다.");
+        }
+
         try {
             return objectMapper.readValue(
                     inputStream,
-                    new TypeReference<List<Map<String, Object>>>() {
+                    new TypeReference<>() {
                     }
             );
         } catch (IOException e) {

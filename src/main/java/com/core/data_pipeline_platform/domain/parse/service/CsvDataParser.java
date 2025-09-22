@@ -20,6 +20,15 @@ public class CsvDataParser implements DataParser{
 
     @Override
     public List<Map<String, Object>> parseData(FileType fileType, InputStream inputStream) {
+
+        if (fileType != FileType.CSV) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일 타입 불일치: CSV이어야 합니다.");
+        }
+
+        if (inputStream == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "입력 스트림이 null 입니다.");
+        }
+
         List<Map<String, Object>> records = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         

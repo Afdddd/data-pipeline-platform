@@ -26,6 +26,15 @@ public class XmlDataParser implements DataParser {
 
     @Override
     public List<Map<String, Object>> parseData(FileType fileType, InputStream inputStream) {
+
+        if (fileType != FileType.XML) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일 타입 불일치: XML이어야 합니다.");
+        }
+
+        if (inputStream == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "입력 스트림이 null 입니다.");
+        }
+
         List<Map<String, Object>> records = new ArrayList<>();
 
         try {
@@ -64,7 +73,7 @@ public class XmlDataParser implements DataParser {
             return records;
             
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "XML 파싱 실패: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "XML 파싱 실패", e);
         }
     }
 

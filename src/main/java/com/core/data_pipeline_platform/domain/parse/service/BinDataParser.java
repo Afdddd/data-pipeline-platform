@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class BinDataParser implements DataParser{
+public class BinDataParser implements DataParser {
 
     private static final String SENSOR_ID = "sensorId";
     private static final String VALUE = "value";
@@ -24,11 +24,24 @@ public class BinDataParser implements DataParser{
 
     @Override
     public List<Map<String, Object>> parseData(FileType fileType, InputStream inputStream) {
+
+        if (fileType != FileType.BIN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일 타입 불일치: BIN이어야 합니다.");
+        }
+
+        if (inputStream == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "입력 스트림이 null 입니다.");
+        }
+
         List<Map<String, Object>> records = new ArrayList<>();
 
-        try (DataInputStream dataStream = new DataInputStream(inputStream)) {
+        try {
+            DataInputStream dataStream = new DataInputStream(inputStream);
             int recordCount = dataStream.readInt();
 
+            if (recordCount < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 레코드 수");
+            }
             for (int i = 0; i < recordCount; i++) {
                 Map<String, Object> record = new HashMap<>();
                 record.put(SENSOR_ID, readString(dataStream));
@@ -40,7 +53,7 @@ public class BinDataParser implements DataParser{
 
             return records;
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Bin 파일 파싱 실패");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BIN 파일 파싱 실패");
         }
     }
 
