@@ -40,4 +40,9 @@ public class JsonDataParser implements DataParser {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Json 파싱 실패");
         }
     }
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.JSON;
+    }
 }

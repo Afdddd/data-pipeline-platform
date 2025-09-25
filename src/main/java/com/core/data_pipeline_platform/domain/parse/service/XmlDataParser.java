@@ -77,6 +77,11 @@ public class XmlDataParser implements DataParser {
         }
     }
 
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.XML;
+    }
+
     private Object getElementContent(Element element, String tagName) {
         NodeList nodes = element.getElementsByTagName(tagName);
         if (nodes.getLength() == 0) {
