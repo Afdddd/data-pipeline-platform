@@ -1,7 +1,9 @@
 package com.core.data_pipeline_platform.domain.parse.service;
 
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,11 @@ public class ParserFactory {
     }
 
     public DataParser getParser(FileType fileType) {
-        return parsers.get(fileType);
+        DataParser parser = parsers.get(fileType);
+        if(parser == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 파일형식입니다.");
+        }
+        return parser;
     }
 
 }
