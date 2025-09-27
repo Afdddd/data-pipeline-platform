@@ -38,9 +38,9 @@ public class FileUploadService {
 
             ParsedDataEntity parsedDataEntity = dataParsingService
                     .parseToEntity(fileType, file.getInputStream(), savedFile);
-            ParsedDataEntity savedEntity = parsedDataRepository.save(parsedDataEntity);
+            parsedDataRepository.save(parsedDataEntity);
 
-            return savedEntity.getId();
+            return savedFile.getId();
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
         } catch (IOException e) {
