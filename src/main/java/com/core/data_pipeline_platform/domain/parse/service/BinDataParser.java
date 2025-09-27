@@ -57,6 +57,11 @@ public class BinDataParser implements DataParser {
         }
     }
 
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.BIN;
+    }
+
     private String readString(DataInputStream dataStream) throws IOException {
         int length = dataStream.readInt();
         if (length == 0) return "";

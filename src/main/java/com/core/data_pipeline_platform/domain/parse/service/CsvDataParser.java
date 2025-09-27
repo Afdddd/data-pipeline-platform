@@ -64,4 +64,9 @@ public class CsvDataParser implements DataParser{
         }
         
     }
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.CSV;
+    }
 }
