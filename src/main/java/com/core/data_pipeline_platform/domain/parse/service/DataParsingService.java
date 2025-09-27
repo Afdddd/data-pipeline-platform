@@ -21,7 +21,7 @@ public class DataParsingService {
     private final ParserFactory parserFactory;
     private final ObjectMapper objectMapper;
 
-    public ParsedDataEntity parseAndSave(FileType fileType, InputStream inputStream, FileEntity file) {
+    public ParsedDataEntity parseToEntity(FileType fileType, InputStream inputStream, FileEntity file) {
         try {
             DataParser parser = parserFactory.getParser(fileType);
             List<Map<String, Object>> maps = parser.parseData(fileType, inputStream);

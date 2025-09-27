@@ -3,6 +3,9 @@ package com.core.data_pipeline_platform.domain.file.service;
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
+import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity;
+import com.core.data_pipeline_platform.domain.parse.repository.ParsedDataRepository;
+import com.core.data_pipeline_platform.domain.parse.service.DataParsingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -29,6 +35,12 @@ class FileUploadServiceTest {
     
     @Mock
     private FileStorageService fileStorageService;
+
+    @Mock
+    private DataParsingService dataParsingService;
+
+    @Mock
+    private ParsedDataRepository parsedDataRepository;
 
     @InjectMocks  // Mock 객체들을 주입받는 실제 테스트 대상
     private FileUploadService fileUploadService;
@@ -48,7 +60,7 @@ class FileUploadServiceTest {
 
     @Test
     @DisplayName("정상적인 파일 업로드 - 성공")
-    void uploadFile_Success() {
+    void uploadFile_Success() throws IOException {
         // Given (준비)
         given(fileRepository.existsByOriginName("test.json"))
             .willReturn(false);  // 중복 파일 없음
@@ -63,7 +75,7 @@ class FileUploadServiceTest {
         given(fileStorageService.storeFile(mockFile, FileType.JSON))
             .willReturn(storageEntity);
         
-        FileEntity savedEntity = FileEntity.builder()
+        FileEntity savedFile = FileEntity.builder()
             .id(1L)
             .fileType(FileType.JSON)
             .originName("test.json")
@@ -72,7 +84,19 @@ class FileUploadServiceTest {
             .build();
         
         given(fileRepository.save(storageEntity))
-            .willReturn(savedEntity);
+            .willReturn(savedFile);
+
+        ParsedDataEntity parsedData = ParsedDataEntity.builder()
+                .id(1L)
+                .file(savedFile)
+                .data("{name : test")
+                .build();
+
+        given(dataParsingService.parseToEntity(any(FileType.class), any(InputStream.class), any(FileEntity.class)))
+                .willReturn(parsedData);
+
+        given(parsedDataRepository.save(any(ParsedDataEntity.class)))
+                .willReturn(parsedData);
 
         // When (실행)
         Long result = fileUploadService.uploadFile(mockFile);
@@ -195,7 +219,7 @@ class FileUploadServiceTest {
         given(fileStorageService.storeFile(any(), eq(FileType.JSON)))
                 .willReturn(storageEntity);
 
-        FileEntity savedEntity = FileEntity.builder()
+        FileEntity savedFile = FileEntity.builder()
                 .id(1L)
                 .fileType(FileType.JSON)
                 .originName("unique.json")
@@ -204,7 +228,20 @@ class FileUploadServiceTest {
                 .build();
 
         given(fileRepository.save(storageEntity))
-                .willReturn(savedEntity);  // DB 제약조건도 통과
+                .willReturn(savedFile);  // DB 제약조건도 통과
+
+        ParsedDataEntity parsedData = ParsedDataEntity.builder()
+                .id(1L)
+                .file(savedFile)
+                .data("{name : test")
+                .build();
+
+        given(dataParsingService.parseToEntity(any(FileType.class), any(InputStream.class), any(FileEntity.class)))
+                .willReturn(parsedData);
+
+        given(parsedDataRepository.save(any(ParsedDataEntity.class)))
+                .willReturn(parsedData);
+
 
         MultipartFile uniqueFile = new MockMultipartFile(
                 "file", "unique.json", "application/json", "content".getBytes()

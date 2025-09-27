@@ -1,14 +1,20 @@
 package com.core.data_pipeline_platform.domain.file.service;
 
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
+import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity;
+import com.core.data_pipeline_platform.domain.parse.repository.ParsedDataRepository;
+import com.core.data_pipeline_platform.domain.parse.service.DataParsingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 
 
 @Service
@@ -17,18 +23,28 @@ public class FileUploadService {
 
     private final FileRepository fileRepository;
     private final FileStorageService fileStorageService;
+    private final DataParsingService dataParsingService;
+    private final ParsedDataRepository parsedDataRepository;
 
+    @Transactional
     public Long uploadFile(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         FileType fileType = validateAndGetFileType(fileName);
         validateDuplicateFileName(fileName);
-        
-        try{
+
+        try {
             FileEntity fileEntity = fileStorageService.storeFile(file, fileType);
-            FileEntity savedEntity = fileRepository.save(fileEntity);
+            FileEntity savedFile = fileRepository.save(fileEntity);
+
+            ParsedDataEntity parsedDataEntity = dataParsingService
+                    .parseToEntity(fileType, file.getInputStream(), savedFile);
+            ParsedDataEntity savedEntity = parsedDataRepository.save(parsedDataEntity);
+
             return savedEntity.getId();
-        }catch(DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패");
         }
     }
 
