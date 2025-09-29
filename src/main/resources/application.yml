@@ -18,6 +18,15 @@ spring:
       max-request-size: 50MB
       enabled: true         
 
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 # Logging
 logging:
@@ -25,3 +34,9 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.core.data_pipeline_platform: DEBUG
+
+# 파일 업로드 설정
+file:
+  upload:
+    chunked:
+      default-chunk-size: 5000
