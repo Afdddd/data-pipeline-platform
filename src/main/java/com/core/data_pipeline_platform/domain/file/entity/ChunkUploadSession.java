@@ -30,6 +30,12 @@ public class ChunkUploadSession {
     @OneToOne
     @JoinColumn(name = "file_id")
     private FileEntity file;
+
+    @Column(name = "file_type", nullable = false)
+    private FileType fileType;
+
+    @Column(name = "file_name", nullable = false)
+    private String fileName;
     
     @Column(name = "session_id", unique = true, nullable = false)
     private String sessionId;
@@ -41,14 +47,14 @@ public class ChunkUploadSession {
     private Integer totalChunks;
     
     @Column(name = "completed_chunks", nullable = false)
-    private Integer completedChunks = 0;
+    private Integer completedChunks;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ChunkUploadStatus status = ChunkUploadStatus.PENDING;
+    private ChunkUploadStatus status;
     
     @Column(name = "chunk_info", columnDefinition = "JSON")
-    private String chunkInfo = "{}";
+    private String chunkInfo;
     
     @CreationTimestamp
     @Column(name = "created_at")
