@@ -2,15 +2,16 @@ package com.core.data_pipeline_platform.domain.file.entity;
 
 import com.core.data_pipeline_platform.domain.file.enums.ChunkUploadStatus;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 청크 업로드 세션을 관리하는 엔티티
@@ -22,6 +23,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 public class ChunkUploadSession {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,4 +66,33 @@ public class ChunkUploadSession {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public void incrementCompletedChunks() {
+        this.completedChunks++;
+    }
+
+    public void updateChunkInfo(int chunkIndex, ChunkUploadStatus status) {
+
+        Map<String, String> chunkInfoMap = new HashMap<>();
+
+        try{
+            if(chunkInfo != null && !chunkInfo.isEmpty()){
+                chunkInfoMap= objectMapper.readValue(chunkInfo, new TypeReference<Map<String, String>>() {});
+            }
+
+            chunkInfoMap.put(String.valueOf(chunkIndex), status.name());
+
+            this.chunkInfo = objectMapper.writeValueAsString(chunkInfoMap);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void updateStatus(ChunkUploadStatus status) {
+        this.status = status;
+    }
+
+    public int getProgress() {
+        return (int) (((double) completedChunks / totalChunks) * 100);
+    }
 }

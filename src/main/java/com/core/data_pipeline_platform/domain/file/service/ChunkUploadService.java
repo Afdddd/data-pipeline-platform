@@ -1,5 +1,7 @@
 package com.core.data_pipeline_platform.domain.file.service;
 
+import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadRequest;
+import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadResponse;
 import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadStartRequest;
 import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadStartResponse;
 import com.core.data_pipeline_platform.domain.file.entity.ChunkUploadSession;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChunkUploadService {
 
+    private final FileStorageService fileStorageService;
     private final ChunkUploadSessionRepository chunkUploadSessionRepository;
 
     @Transactional
@@ -42,6 +45,23 @@ public class ChunkUploadService {
 
         return new ChunkUploadStartResponse(sessionId);
     }
+
+    @Transactional
+    public ChunkUploadResponse upload(ChunkUploadRequest request) {
+
+        // db 에서 청크 세션 조회
+        ChunkUploadSession uploadSession = chunkUploadSessionRepository.findBySessionId(request.sessionId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "서버에 세션이 없습니다."));
+
+        // 임시 파일 생성
+        if(fileStorageService.storeChunk(request)){
+            uploadSession.incrementCompletedChunks();
+            uploadSession.updateChunkInfo(request.chunkIndex(), ChunkUploadStatus.COMPLETED);
+        }
+
+        return new ChunkUploadResponse(uploadSession.getProgress());
+    }
+
 
     private FileType validateAndGetFileType(String fileName) {
         if (!FileType.isSupported(fileName)) {
