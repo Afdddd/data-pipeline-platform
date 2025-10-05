@@ -50,7 +50,7 @@ public class FileStorageService {
                 .build();
     }
 
-    public boolean storeChunk(ChunkUploadRequest request) {
+    public void storeChunk(ChunkUploadRequest request) {
         Path dir = Paths.get(chunkUploadDir,request.sessionId());
         try{
             if (!Files.exists(dir)) {
@@ -62,6 +62,5 @@ public class FileStorageService {
         }catch (IOException e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "청크 파일 생성 실패");
         }
-        return true;
     }
 }

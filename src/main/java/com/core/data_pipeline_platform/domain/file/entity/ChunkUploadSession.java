@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -72,21 +74,35 @@ public class ChunkUploadSession {
     }
 
     public void updateChunkInfo(int chunkIndex, ChunkUploadStatus status) {
-
         Map<String, String> chunkInfoMap = new HashMap<>();
 
         try{
             if(chunkInfo != null && !chunkInfo.isEmpty()){
-                chunkInfoMap= objectMapper.readValue(chunkInfo, new TypeReference<Map<String, String>>() {});
+                chunkInfoMap = objectMapper.readValue(chunkInfo, new TypeReference<>() {});
             }
 
             chunkInfoMap.put(String.valueOf(chunkIndex), status.name());
 
             this.chunkInfo = objectMapper.writeValueAsString(chunkInfoMap);
         }catch (Exception e){
-            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "chunkInfo update 실패.");
         }
     }
+
+    public boolean isChunkAlreadyUploaded(int chunkIndex) {
+        try {
+            if (chunkInfo == null || chunkInfo.isEmpty()) {
+                return false;
+            }
+
+            Map<String, String> chunkMap = objectMapper.readValue(chunkInfo, new TypeReference<>() {});
+            String status = chunkMap.get(String.valueOf(chunkIndex));
+            return "COMPLETED".equals(status);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     public void updateStatus(ChunkUploadStatus status) {
         this.status = status;
