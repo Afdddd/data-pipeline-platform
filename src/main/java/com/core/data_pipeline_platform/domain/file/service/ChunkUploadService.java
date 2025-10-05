@@ -1,20 +1,19 @@
 package com.core.data_pipeline_platform.domain.file.service;
 
-import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadRequest;
-import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadResponse;
-import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadStartRequest;
-import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadStartResponse;
+import com.core.data_pipeline_platform.domain.file.dto.*;
 import com.core.data_pipeline_platform.domain.file.entity.ChunkUploadSession;
+import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
 import com.core.data_pipeline_platform.domain.file.enums.ChunkUploadStatus;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.ChunkUploadSessionRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -74,6 +73,37 @@ public class ChunkUploadService {
         }
 
         return new ChunkUploadResponse(uploadSession.getProgress());
+    }
+
+    @Transactional
+    public ChunkUploadCompleteResponse completeUpload(String sessionId) {
+        ChunkUploadSession uploadSession = chunkUploadSessionRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "서버에 세션이 없습니다."));
+
+        List<Integer> failedChunks = uploadSession.getFailedChunks();
+    
+        if (!failedChunks.isEmpty()) {
+            return new ChunkUploadCompleteResponse(
+                false,
+                "일부 청크 업로드 실패",
+                failedChunks,
+                null
+            );
+        }
+
+        try {
+            FileEntity fileEntity = fileStorageService.mergeChunks(uploadSession);
+            uploadSession.updateStatus(ChunkUploadStatus.COMPLETED);
+
+            return new ChunkUploadCompleteResponse(
+                true,
+                "업로드 완료",
+                Collections.emptyList(),
+                fileEntity.getId().toString()
+            );
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 합치기 실패");
+        }
     }
 
 

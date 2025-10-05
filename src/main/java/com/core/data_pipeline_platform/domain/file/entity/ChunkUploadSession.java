@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -101,6 +102,25 @@ public class ChunkUploadSession {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public List<Integer> getFailedChunks() {
+
+        try{
+            if (chunkInfo == null || chunkInfo.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "chunkInfo가 없습니다.");
+            }
+
+            Map<String, String> chunkMap = objectMapper.readValue(chunkInfo, new TypeReference<>() {});
+            return chunkMap.entrySet().stream()
+                    .filter(entry -> !"COMPLETED".equals(entry.getValue()))
+                    .map(Map.Entry::getKey)
+                    .map(Integer::parseInt)
+                    .toList();
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "getFailedChunks 실패");
+        }
+
     }
 
 
