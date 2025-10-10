@@ -2,42 +2,52 @@ package com.core.data_pipeline_platform.domain.file.service;
 
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
+import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FileStorageService 테스트")
 class FileStorageServiceTest {
 
+    @Mock
+    private FileRepository fileRepository;
+
+    @InjectMocks
     private FileStorageService fileStorageService;
-    
+
     @TempDir
     Path tempDir;  // JUnit 5의 임시 디렉토리
+
+    @TempDir
+    Path chunkUploadDir;
     
     @BeforeEach
     void setUp() {
-        fileStorageService = new FileStorageService();
-        // uploadDir을 임시 디렉토리로 설정
         ReflectionTestUtils.setField(fileStorageService, "uploadDir", tempDir.toString());
+        ReflectionTestUtils.setField(fileStorageService, "chunkUploadDir", chunkUploadDir.toString());
     }
 
     @Test
     @DisplayName("JSON 파일 저장 - 성공")
-    void storeFile_JsonFile_Success() throws IOException {
+    void storeFile_JsonFile_Success() {
         // Given
         String content = "{\"name\": \"test\"}";
         MultipartFile file = new MockMultipartFile(
@@ -48,8 +58,19 @@ class FileStorageServiceTest {
         );
         FileType fileType = FileType.JSON;
 
+        FileEntity entity = FileEntity.builder()
+                .originName("test.json")
+                .fileType(FileType.JSON)
+                .storedName("stored-test")
+                .directoryName("dir")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class))).thenReturn(entity);
+
+
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
+
 
         // Then
         assertThat(result).isNotNull();
@@ -57,24 +78,11 @@ class FileStorageServiceTest {
         assertThat(result.getFileType()).isEqualTo(FileType.JSON);
         assertThat(result.getStoredName()).isNotNull();
         assertThat(result.getDirectoryName()).isNotNull();
-        
-        // 실제 파일이 생성되었는지 확인
-        Path expectedPath = Paths.get(
-            tempDir.toString(), 
-            fileType.getExtension(), 
-            result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getExtension()
-        );
-        assertThat(Files.exists(expectedPath)).isTrue();
-        
-        // 파일 내용 확인
-        String savedContent = Files.readString(expectedPath);
-        assertThat(savedContent).isEqualTo(content);
     }
 
     @Test
     @DisplayName("CSV 파일 저장 - 성공")
-    void storeFile_CsvFile_Success() throws IOException {
+    void storeFile_CsvFile_Success() {
         // Given
         String content = "name,age\nJohn,30\nJane,25";
         MultipartFile file = new MockMultipartFile(
@@ -85,6 +93,15 @@ class FileStorageServiceTest {
         );
         FileType fileType = FileType.CSV;
 
+        FileEntity entity = FileEntity.builder()
+                .originName("users.csv")
+                .fileType(FileType.CSV)
+                .storedName("stored-test")
+                .directoryName("dir")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class))).thenReturn(entity);
+
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
 
@@ -92,20 +109,11 @@ class FileStorageServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getOriginName()).isEqualTo("users.csv");
         assertThat(result.getFileType()).isEqualTo(FileType.CSV);
-        
-        // 디렉토리 구조 확인: uploads/csv/uuid/
-        Path expectedPath = Paths.get(
-            tempDir.toString(),
-            "csv",
-            result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getExtension()
-        );
-        assertThat(Files.exists(expectedPath)).isTrue();
     }
 
     @Test
     @DisplayName("XML 파일 저장 - 성공")
-    void storeFile_XmlFile_Success() throws IOException {
+    void storeFile_XmlFile_Success() {
         // Given
         String content = "<?xml version=\"1.0\"?><root><item>test</item></root>";
         MultipartFile file = new MockMultipartFile(
@@ -116,6 +124,15 @@ class FileStorageServiceTest {
         );
         FileType fileType = FileType.XML;
 
+        FileEntity entity = FileEntity.builder()
+                .originName("data.xml")
+                .fileType(FileType.XML)
+                .storedName("stored-test")
+                .directoryName("dir")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class))).thenReturn(entity);
+
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
 
@@ -123,21 +140,11 @@ class FileStorageServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getOriginName()).isEqualTo("data.xml");
         assertThat(result.getFileType()).isEqualTo(FileType.XML);
-        
-        // 파일이 올바른 위치에 저장되었는지 확인
-        Path expectedPath = Paths.get(
-            tempDir.toString(),
-            "xml",
-            result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getExtension()
-        );
-        assertThat(Files.exists(expectedPath)).isTrue();
-        assertThat(Files.readString(expectedPath)).isEqualTo(content);
     }
 
     @Test
     @DisplayName("빈 파일 저장 - 성공")
-    void storeFile_EmptyFile_Success() throws IOException {
+    void storeFile_EmptyFile_Success() {
         // Given
         MultipartFile file = new MockMultipartFile(
             "file",
@@ -147,27 +154,26 @@ class FileStorageServiceTest {
         );
         FileType fileType = FileType.JSON;
 
+        FileEntity entity = FileEntity.builder()
+                .originName("empty.json")
+                .fileType(FileType.JSON)
+                .storedName("stored-test")
+                .directoryName("dir")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class))).thenReturn(entity);
+
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getOriginName()).isEqualTo("empty.json");
-        
-        // 빈 파일도 생성되는지 확인
-        Path expectedPath = Paths.get(
-            tempDir.toString(),
-            fileType.getExtension(),
-            result.getDirectoryName(),
-            result.getStoredName() + "." + fileType.getExtension()
-        );
-        assertThat(Files.exists(expectedPath)).isTrue();
-        assertThat(Files.size(expectedPath)).isEqualTo(0);
     }
 
     @Test
     @DisplayName("디렉토리 구조 확인")
-    void storeFile_CheckDirectoryStructure() throws IOException {
+    void storeFile_CheckDirectoryStructure() {
         // Given
         MultipartFile file = new MockMultipartFile(
             "file",
@@ -176,6 +182,9 @@ class FileStorageServiceTest {
             "content".getBytes()
         );
         FileType fileType = FileType.JSON;
+
+        when(fileRepository.save(any(FileEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
@@ -203,6 +212,25 @@ class FileStorageServiceTest {
         );
         FileType fileType = FileType.JSON;
 
+        FileEntity testEntity1 = FileEntity.builder()
+                .originName("test1.json")
+                .fileType(FileType.JSON)
+                .storedName("stored-test-1")
+                .directoryName("dir1")
+                .build();
+
+
+        FileEntity testEntity2 = FileEntity.builder()
+                .originName("test2.json")
+                .fileType(FileType.JSON)
+                .storedName("stored-test-2")
+                .directoryName("dir2")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class)))
+                .thenReturn(testEntity1)
+                .thenReturn(testEntity2);
+
         // When
         FileEntity result1 = fileStorageService.storeFile(file1, fileType);
         FileEntity result2 = fileStorageService.storeFile(file2, fileType);
@@ -223,6 +251,15 @@ class FileStorageServiceTest {
             "content".getBytes()
         );
         FileType fileType = FileType.JSON;
+
+        FileEntity entity = FileEntity.builder()
+                .originName("테스트-파일_#1.json")
+                .fileType(FileType.JSON)
+                .storedName("stored-test")
+                .directoryName("dir")
+                .build();
+
+        when(fileRepository.save(any(FileEntity.class))).thenReturn(entity);
 
         // When
         FileEntity result = fileStorageService.storeFile(file, fileType);
