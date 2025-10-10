@@ -55,6 +55,10 @@ public class ChunkUploadService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 완료된 세션입니다.");
         }
 
+        if (uploadSession.getStatus() == ChunkUploadStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "취소된 세션입니다.");
+        }
+
         if(request.chunkIndex() < 0 || request.chunkIndex() >= uploadSession.getTotalChunks()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 청크 인덱스 입니다.");
         }
@@ -67,6 +71,10 @@ public class ChunkUploadService {
             fileStorageService.storeChunk(request);
             uploadSession.incrementCompletedChunks();
             uploadSession.updateChunkInfo(request.chunkIndex(), ChunkUploadStatus.COMPLETED);
+
+            if (uploadSession.getStatus() != ChunkUploadStatus.IN_PROGRESS) {
+                uploadSession.updateStatus(ChunkUploadStatus.IN_PROGRESS);
+            }
         } catch (ResponseStatusException e) {
             uploadSession.updateChunkInfo(request.chunkIndex(), ChunkUploadStatus.FAILED);
             throw e; 
@@ -83,6 +91,7 @@ public class ChunkUploadService {
         List<Integer> failedChunks = uploadSession.getFailedChunks();
     
         if (!failedChunks.isEmpty()) {
+            uploadSession.updateStatus(ChunkUploadStatus.FAILED);
             return new ChunkUploadCompleteResponse(
                 false,
                 "일부 청크 업로드 실패",
@@ -106,6 +115,33 @@ public class ChunkUploadService {
         }
     }
 
+    @Transactional
+    public ChunkUploadCancelResponse cancelUpload(String sessionId) {
+        ChunkUploadSession uploadSession = chunkUploadSessionRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "서버에 세션이 없습니다."));
+
+        // 이미 완료되거나 취소된 세션은 처리하지 않음
+        if (uploadSession.getStatus() == ChunkUploadStatus.COMPLETED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 완료된 세션입니다.");
+        }
+
+        if (uploadSession.getStatus() == ChunkUploadStatus.CANCELLED) {
+            return new ChunkUploadCancelResponse(true, "이미 취소된 세션입니다.");
+        }
+
+        // 상태를 CANCELLED로 변경
+        uploadSession.updateStatus(ChunkUploadStatus.CANCELLED);
+
+        // 임시 청크 파일들 정리
+        try {
+            fileStorageService.cleanupChunkFiles(uploadSession);
+        } catch (Exception e) {
+            // 파일 정리 실패해도 취소는 성공으로 처리
+            System.err.println("청크 파일 정리 실패: " + e.getMessage());
+        }
+
+        return new ChunkUploadCancelResponse(true, "업로드가 취소되었습니다.");
+    }
 
     private FileType validateAndGetFileType(String fileName) {
         if (!FileType.isSupported(fileName)) {

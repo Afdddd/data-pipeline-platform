@@ -27,4 +27,9 @@ public class ChunkUploadController {
     public ResponseEntity<ChunkUploadCompleteResponse> completeChunkUpload(@PathVariable String sessionId) {
         return ResponseEntity.ok(chunkUploadService.completeUpload(sessionId));
     }
+
+    @PostMapping("/cancel/{sessionId}")
+    public ResponseEntity<ChunkUploadCancelResponse> cancelChunkUpload(@PathVariable String sessionId) {
+        return ResponseEntity.ok(chunkUploadService.cancelUpload(sessionId));
+    }
 }

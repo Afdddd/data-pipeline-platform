@@ -3,6 +3,7 @@ package com.core.data_pipeline_platform.domain.file.service;
 import com.core.data_pipeline_platform.domain.file.dto.ChunkUploadRequest;
 import com.core.data_pipeline_platform.domain.file.entity.ChunkUploadSession;
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
+import com.core.data_pipeline_platform.domain.file.enums.ChunkUploadStatus;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +89,7 @@ public class FileStorageService {
                 }
             }
         } catch (IOException e) {
+            session.updateStatus(ChunkUploadStatus.FAILED);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 합치기 실패");
         }
 
@@ -142,6 +144,26 @@ public class FileStorageService {
             }
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "임시 파일 정리 실패");
+        }
+    }
+
+    public void cleanupChunkFiles(ChunkUploadSession session) {
+        try {
+            Path sessionDir = Paths.get(chunkUploadDir, session.getSessionId());
+            if (Files.exists(sessionDir)) {
+                Files.walk(sessionDir)
+                    .sorted(Comparator.reverseOrder()) // 하위 디렉토리부터 삭제
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException e) {
+                            // 로그만 남기고 계속 진행
+                            System.err.println("청크 파일 삭제 실패: " + path + " - " + e.getMessage());
+                        }
+                    });
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "청크 파일 정리 실패");
         }
     }
 }
