@@ -65,16 +65,6 @@ class FileUploadServiceTest {
         given(fileRepository.existsByOriginName("test.json"))
             .willReturn(false);  // 중복 파일 없음
         
-        FileEntity storageEntity = FileEntity.builder()
-            .fileType(FileType.JSON)
-            .originName("test.json")
-            .directoryName("uuid-directory")
-            .storedName("uuid-stored")
-            .build();
-        
-        given(fileStorageService.storeFile(mockFile, FileType.JSON))
-            .willReturn(storageEntity);
-        
         FileEntity savedFile = FileEntity.builder()
             .id(1L)
             .fileType(FileType.JSON)
@@ -83,7 +73,7 @@ class FileUploadServiceTest {
             .storedName("uuid-stored")
             .build();
         
-        given(fileRepository.save(storageEntity))
+        given(fileStorageService.storeFile(mockFile, FileType.JSON))
             .willReturn(savedFile);
 
         ParsedDataEntity parsedData = ParsedDataEntity.builder()
@@ -107,7 +97,8 @@ class FileUploadServiceTest {
         // 메서드 호출 검증
         then(fileRepository).should().existsByOriginName("test.json");
         then(fileStorageService).should().storeFile(mockFile, FileType.JSON);
-        then(fileRepository).should().save(storageEntity);
+        then(dataParsingService).should().parseToEntity(any(FileType.class), any(InputStream.class), any(FileEntity.class));
+        then(parsedDataRepository).should().save(any(ParsedDataEntity.class));
     }
 
     @Test
@@ -174,17 +165,7 @@ class FileUploadServiceTest {
         given(fileRepository.existsByOriginName("test.json"))
                 .willReturn(false);
 
-        FileEntity storageEntity = FileEntity.builder()
-                .fileType(FileType.JSON)
-                .originName("test.json")
-                .directoryName("uuid-directory")
-                .storedName("uuid-storedName")
-                .build();
-
         given(fileStorageService.storeFile(mockFile, FileType.JSON))
-                .willReturn(storageEntity);
-
-        given(fileRepository.save(storageEntity))
                 .willThrow(new DataIntegrityViolationException("UNIQUE constraint violation"));
 
         // When & Then
@@ -198,8 +179,7 @@ class FileUploadServiceTest {
 
         then(fileRepository).should().existsByOriginName("test.json");
         then(fileStorageService).should().storeFile(mockFile, FileType.JSON);
-        then(fileRepository).should().save(storageEntity);
-
+        then(fileRepository).should(never()).save(any());
     }
 
     @Test
@@ -209,16 +189,6 @@ class FileUploadServiceTest {
         given(fileRepository.existsByOriginName("unique.json"))
                 .willReturn(false);
 
-        FileEntity storageEntity = FileEntity.builder()
-                .fileType(FileType.JSON)
-                .originName("unique.json")
-                .directoryName("uuid-directory")
-                .storedName("uuid-stored")
-                .build();
-
-        given(fileStorageService.storeFile(any(), eq(FileType.JSON)))
-                .willReturn(storageEntity);
-
         FileEntity savedFile = FileEntity.builder()
                 .id(1L)
                 .fileType(FileType.JSON)
@@ -227,8 +197,8 @@ class FileUploadServiceTest {
                 .storedName("uuid-stored")
                 .build();
 
-        given(fileRepository.save(storageEntity))
-                .willReturn(savedFile);  // DB 제약조건도 통과
+        given(fileStorageService.storeFile(any(), eq(FileType.JSON)))
+                .willReturn(savedFile);
 
         ParsedDataEntity parsedData = ParsedDataEntity.builder()
                 .id(1L)
@@ -242,7 +212,6 @@ class FileUploadServiceTest {
         given(parsedDataRepository.save(any(ParsedDataEntity.class)))
                 .willReturn(parsedData);
 
-
         MultipartFile uniqueFile = new MockMultipartFile(
                 "file", "unique.json", "application/json", "content".getBytes()
         );
@@ -255,6 +224,7 @@ class FileUploadServiceTest {
 
         then(fileRepository).should().existsByOriginName("unique.json");
         then(fileStorageService).should().storeFile(any(), eq(FileType.JSON));
-        then(fileRepository).should().save(storageEntity);
+        then(dataParsingService).should().parseToEntity(any(FileType.class), any(InputStream.class), any(FileEntity.class));
+        then(parsedDataRepository).should().save(any(ParsedDataEntity.class));
     }
 }
