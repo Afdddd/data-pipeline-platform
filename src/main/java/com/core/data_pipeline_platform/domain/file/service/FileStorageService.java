@@ -93,11 +93,10 @@ public class FileStorageService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 합치기 실패");
         }
 
+        FileEntity fileEntity = createFileEntity(session, tempFile);
+
         // 임시 청크 파일들 삭제
         cleanupTempFiles(session);
-
-
-        FileEntity fileEntity = createFileEntity(session, tempFile);
 
         return fileRepository.save(fileEntity);
     }
