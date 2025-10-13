@@ -37,6 +37,7 @@ public class ChunkUploadSession {
     @JoinColumn(name = "file_id")
     private FileEntity file;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "file_type", nullable = false)
     private FileType fileType;
 
