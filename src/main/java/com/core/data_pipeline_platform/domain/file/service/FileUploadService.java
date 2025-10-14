@@ -56,8 +56,7 @@ public class FileUploadService {
 
     private FileEntity saveFile(MultipartFile file, FileType fileType) {
         try {
-            FileEntity fileEntity = fileStorageService.storeFile(file, fileType);
-            return fileRepository.save(fileEntity);
+            return fileStorageService.storeFile(file, fileType);
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
         }
