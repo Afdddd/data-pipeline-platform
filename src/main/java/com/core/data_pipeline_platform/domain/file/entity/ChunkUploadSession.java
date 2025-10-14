@@ -71,6 +71,9 @@ public class ChunkUploadSession {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Version
+    private Long version;
+
     public void incrementCompletedChunks() {
         this.completedChunks++;
     }

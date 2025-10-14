@@ -1,5 +1,6 @@
 package com.core.data_pipeline_platform.domain.file.service;
 
+import com.core.data_pipeline_platform.common.annotation.Retryable;
 import com.core.data_pipeline_platform.domain.file.dto.*;
 import com.core.data_pipeline_platform.domain.file.entity.ChunkUploadSession;
 import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
@@ -47,6 +48,7 @@ public class ChunkUploadService {
     }
 
     @Transactional
+    @Retryable
     public ChunkUploadResponse upload(ChunkUploadRequest request) {
         ChunkUploadSession uploadSession = chunkUploadSessionRepository.findBySessionId(request.sessionId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "서버에 세션이 없습니다."));
