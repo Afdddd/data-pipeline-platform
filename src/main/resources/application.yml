@@ -16,7 +16,10 @@ spring:
     multipart:
       max-file-size: 10MB      
       max-request-size: 50MB
-      enabled: true         
+      enabled: true
+  shell:
+    interactive:
+      enabled: true
 
 # Actuator
 management:
