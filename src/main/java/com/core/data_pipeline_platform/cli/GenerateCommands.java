@@ -1,10 +1,8 @@
 package com.core.data_pipeline_platform.cli;
 
+import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
-import com.core.data_pipeline_platform.domain.generator.service.BinFileGenerator;
-import com.core.data_pipeline_platform.domain.generator.service.CsvFileGenerator;
-import com.core.data_pipeline_platform.domain.generator.service.JsonFileGenerator;
-import com.core.data_pipeline_platform.domain.generator.service.XmlFileGenerator;
+import com.core.data_pipeline_platform.domain.generator.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -19,10 +17,7 @@ import java.nio.file.Paths;
 @RequiredArgsConstructor
 public class GenerateCommands {
 
-    private final JsonFileGenerator jsonFileGenerator;
-    private final CsvFileGenerator csvFileGenerator;
-    private final XmlFileGenerator xmlFileGenerator;
-    private final BinFileGenerator binFileGenerator;
+    private final GeneratorFactory factory;
 
     @ShellMethod(key = "generate", value = "Generate a test file")
     public String generate(
@@ -33,16 +28,8 @@ public class GenerateCommands {
     ) {
         try {
             GenerateRequest request = new GenerateRequest(name, rows);
-            byte[] content;
-
-            // 포맷에 따라 생성
-            content = switch (format.toLowerCase()) {
-                case "json" -> jsonFileGenerator.generateFile(request);
-                case "csv" -> csvFileGenerator.generateFile(request);
-                case "xml" -> xmlFileGenerator.generateFile(request);
-                case "bin" -> binFileGenerator.generateFile(request);
-                default -> throw new IllegalArgumentException("지원하지 않는 형식: " + format);
-            };
+            FileType fileType = FileType.fromExtension(format);
+            byte[] content = factory.getFileGenerator(fileType).generateFile(request);
 
             // 파일 저장
             Path outputPath = Paths.get(outputDir, name + "." + format.toLowerCase());

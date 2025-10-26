@@ -1,5 +1,6 @@
 package com.core.data_pipeline_platform.domain.generator.service;
 
+import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
 import com.core.data_pipeline_platform.domain.generator.model.SensorData;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,5 +39,10 @@ public class JsonFileGenerator implements FileGenerator{
             throw new RuntimeException("JSON 생성 실패", e);
         }
 
+    }
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.JSON;
     }
 }

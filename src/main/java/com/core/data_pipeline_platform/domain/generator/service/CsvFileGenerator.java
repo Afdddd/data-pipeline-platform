@@ -1,5 +1,6 @@
 package com.core.data_pipeline_platform.domain.generator.service;
 
+import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
 import com.core.data_pipeline_platform.domain.generator.model.SensorData;
 import org.springframework.stereotype.Component;
@@ -40,5 +41,10 @@ public class CsvFileGenerator implements FileGenerator{
         }
 
         return csvBuilder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.CSV;
     }
 }

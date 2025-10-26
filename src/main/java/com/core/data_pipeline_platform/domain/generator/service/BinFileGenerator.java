@@ -1,5 +1,6 @@
 package com.core.data_pipeline_platform.domain.generator.service;
 
+import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
 import com.core.data_pipeline_platform.domain.generator.model.SensorData;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,12 @@ public class BinFileGenerator implements FileGenerator{
             throw new RuntimeException("바이너리 파일 생성 실패", e);
         }
     }
-    
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.BIN;
+    }
+
     /**
      * 개별 센서 데이터 레코드를 바이너리로 쓰기
      */

@@ -1,5 +1,6 @@
 package com.core.data_pipeline_platform.domain.generator.service;
 
+import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
 import org.springframework.stereotype.Component;
 
@@ -30,5 +31,10 @@ public class XmlFileGenerator implements FileGenerator{
         xmlBuilder.append("</sensorData>");
 
         return xmlBuilder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public FileType getSupportedFileType() {
+        return FileType.XML;
     }
 }
