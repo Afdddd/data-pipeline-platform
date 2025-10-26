@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +67,7 @@ class FileUploadControllerTest {
         Long expectedFileId = 1L;
         
         doNothing().when(fileValidator).validateFile(any());  // 검증 통과
-        given(fileUploadService.uploadFile(any())).willReturn(expectedFileId);
+        given(fileUploadService.uploadFile((MultipartFile) any())).willReturn(expectedFileId);
 
         // When & Then
         mockMvc.perform(multipart("/api/files/upload")
@@ -77,7 +78,7 @@ class FileUploadControllerTest {
 
         // 호출 검증
         then(fileValidator).should().validateFile(any());
-        then(fileUploadService).should().uploadFile(any());
+        then(fileUploadService).should().uploadFile((MultipartFile) any());
     }
 
     @Test
@@ -102,7 +103,7 @@ class FileUploadControllerTest {
     void uploadFile_ServiceThrowsException_ReturnsBadRequest() throws Exception {
         // Given
         doNothing().when(fileValidator).validateFile(any());  // 검증 통과
-        given(fileUploadService.uploadFile(any()))
+        given(fileUploadService.uploadFile((MultipartFile) any()))
             .willThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다."));
 
         // When & Then
@@ -113,7 +114,7 @@ class FileUploadControllerTest {
 
         // 모든 메서드가 호출되었는지 검증
         then(fileValidator).should().validateFile(any());
-        then(fileUploadService).should().uploadFile(any());
+        then(fileUploadService).should().uploadFile((MultipartFile) any());
     }
 
     @Test
@@ -148,7 +149,7 @@ class FileUploadControllerTest {
         
         Long expectedFileId = 2L;
         doNothing().when(fileValidator).validateFile(any());
-        given(fileUploadService.uploadFile(any())).willReturn(expectedFileId);
+        given(fileUploadService.uploadFile((MultipartFile) any())).willReturn(expectedFileId);
 
         // When & Then
         mockMvc.perform(multipart("/api/files/upload")
@@ -160,7 +161,7 @@ class FileUploadControllerTest {
 
         // 한 번만 호출되어야 함 (첫 번째 파일만 처리)
         then(fileValidator).should().validateFile(any());
-        then(fileUploadService).should().uploadFile(any());
+        then(fileUploadService).should().uploadFile((MultipartFile) any());
     }
 
     @Test
