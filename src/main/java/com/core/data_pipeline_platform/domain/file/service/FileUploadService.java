@@ -16,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 @Service
@@ -37,6 +39,22 @@ public class FileUploadService {
         parseAndSaveData(file, fileType, savedFile);
 
         return savedFile.getId();
+    }
+
+    @Transactional
+    public Long uploadFile(Path filePath) {
+        try {
+            String fileName = filePath.getFileName().toString();
+            FileType fileType = validateAndGetFileType(fileName);
+            validateDuplicateFileName(fileName);
+
+            FileEntity savedFile = saveFile(filePath, fileType);
+            parseAndSaveData(filePath, fileType, savedFile);
+
+            return savedFile.getId();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 실패: " + e.getMessage());
+        }
     }
 
 
@@ -62,6 +80,14 @@ public class FileUploadService {
         }
     }
 
+    private FileEntity saveFile(Path filePath, FileType fileType) {
+        try {
+            return fileStorageService.storeFile(filePath, fileType);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
+        }
+    }
+
     private void parseAndSaveData(MultipartFile file, FileType fileType, FileEntity savedFile) {
         try(InputStream inputStream = file.getInputStream()) {
             ParsedDataEntity parsedDataEntity = dataParsingService
@@ -69,6 +95,16 @@ public class FileUploadService {
             parsedDataRepository.save(parsedDataEntity);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패");
+        }
+    }
+
+    private void parseAndSaveData(Path filePath, FileType fileType, FileEntity savedFile) throws IOException {
+        try(InputStream inputStream = Files.newInputStream(filePath)) {
+            ParsedDataEntity parsedDataEntity = dataParsingService
+                    .parseToEntity(fileType, inputStream, savedFile);
+            parsedDataRepository.save(parsedDataEntity);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패: " + e.getMessage());
         }
     }
 }

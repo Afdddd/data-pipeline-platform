@@ -61,6 +61,36 @@ public class FileStorageService {
         return fileRepository.save(fileEntity);
     }
 
+    public FileEntity storeFile(Path filePath, FileType fileType) {
+        String directoryName = UUID.randomUUID().toString();
+        String storedName = UUID.randomUUID().toString();
+        String originName = filePath.getFileName().toString();
+        Path uploadPath = Paths.get(uploadDir, fileType.getExtension(), directoryName);
+
+        try {
+            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "디렉토리 생성 실패");
+        }
+
+        Path targetLocation = uploadPath.resolve(storedName + "." + fileType.getExtension());
+
+        try {
+            Files.copy(filePath, targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 저장 실패");
+        }
+
+        FileEntity fileEntity = FileEntity.builder()
+                .storedName(storedName)
+                .directoryName(directoryName)
+                .fileType(fileType)
+                .originName(originName)
+                .build();
+
+        return fileRepository.save(fileEntity);
+    }
+
     public void storeChunk(ChunkUploadRequest request) {
         Path dir = Paths.get(chunkUploadDir,request.sessionId());
         try{

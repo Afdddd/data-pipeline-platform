@@ -15,6 +15,9 @@ spring:
   h2:
     console:
       enabled: true
+  shell:
+    interactive:
+      enabled: false  # 테스트 환경에서는 REPL 비활성화
 
 # 테스트용 파일 업로드 설정
 file:

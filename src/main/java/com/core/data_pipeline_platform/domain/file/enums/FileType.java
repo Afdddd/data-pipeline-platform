@@ -49,4 +49,13 @@ public enum FileType {
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 형식입니다.");
     }
+
+    public static FileType fromExtension(String extension) {
+        for (FileType type : values()) {
+            if(type.getExtension().equals(extension)){
+                return type;
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 형식입니다.");
+    }
 }

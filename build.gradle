@@ -25,7 +25,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
+    implementation 'org.springframework.shell:spring-shell-starter'
+    
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -39,6 +40,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testRuntimeOnly 'com.h2database:h2'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.shell:spring-shell-dependencies:3.3.4"
+    }
 }
 
 tasks.named('test') {

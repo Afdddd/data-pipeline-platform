@@ -16,7 +16,10 @@ spring:
     multipart:
       max-file-size: 10MB      
       max-request-size: 50MB
-      enabled: true         
+      enabled: true
+  shell:
+    interactive:
+      enabled: true
 
 # Actuator
 management:
@@ -37,5 +40,5 @@ logging:
 
 # 파일 업로드 설정
 file:
-  upload-dir: /uploads
-  chunk-upload-dir: /chunk-uploads
+  upload-dir: ./uploads
+  chunk-upload-dir: ./chunk-uploads
