@@ -1,4 +1,4 @@
-package com.core.data_pipeline_platform.cli;
+package com.core.data_pipeline_platform.common.cli;
 
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
