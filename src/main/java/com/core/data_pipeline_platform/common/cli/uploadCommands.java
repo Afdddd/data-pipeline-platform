@@ -37,11 +37,13 @@ public class uploadCommands {
                 "   File ID: %d\n" +
                 "   Name: %s\n" +
                 "   Size: %.2f KB\n" +
-                "   Type: %s",
+                "   Type: %s\n\n" +
+                "   처리 상태 확인: show %d",
                 fileId,
                 fileName,
                 fileSize / 1024.0,
-                contentType != null ? contentType : "unknown"
+                contentType != null ? contentType : "unknown",
+                fileId
             );
 
         } catch (IOException e) {

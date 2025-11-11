@@ -5,10 +5,12 @@ import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity;
 import com.core.data_pipeline_platform.domain.parse.repository.ParsedDataRepository;
 import com.core.data_pipeline_platform.domain.parse.service.DataParsingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 import org.springframework.web.multipart.MultipartFile;
 import com.core.data_pipeline_platform.domain.file.enums.FileType;
 import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
@@ -16,21 +18,23 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FileUploadService {
 
     private final FileRepository fileRepository;
     private final FileStorageService fileStorageService;
     private final DataParsingService dataParsingService;
+    private final AsyncFileUploadService asyncFileUploadService;
     private final ParsedDataRepository parsedDataRepository;
 
     @Transactional
     public Long uploadFile(MultipartFile file) {
+
         String fileName = file.getOriginalFilename();
         FileType fileType = validateAndGetFileType(fileName);
         validateDuplicateFileName(fileName);
@@ -43,18 +47,15 @@ public class FileUploadService {
 
     @Transactional
     public Long uploadFile(Path filePath) {
-        try {
-            String fileName = filePath.getFileName().toString();
-            FileType fileType = validateAndGetFileType(fileName);
-            validateDuplicateFileName(fileName);
+        String fileName = filePath.getFileName().toString();
+        FileType fileType = validateAndGetFileType(fileName);
+        validateDuplicateFileName(fileName);
 
-            FileEntity savedFile = saveFile(filePath, fileType);
-            parseAndSaveData(filePath, fileType, savedFile);
+        FileEntity savedFile = saveFile(filePath, fileType);
+        
+        asyncFileUploadService.backgroundParse(filePath, fileType, savedFile.getId());
 
-            return savedFile.getId();
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 실패: " + e.getMessage());
-        }
+        return savedFile.getId();
     }
 
 
@@ -95,16 +96,6 @@ public class FileUploadService {
             parsedDataRepository.save(parsedDataEntity);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패");
-        }
-    }
-
-    private void parseAndSaveData(Path filePath, FileType fileType, FileEntity savedFile) throws IOException {
-        try(InputStream inputStream = Files.newInputStream(filePath)) {
-            ParsedDataEntity parsedDataEntity = dataParsingService
-                    .parseToEntity(fileType, inputStream, savedFile);
-            parsedDataRepository.save(parsedDataEntity);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패: " + e.getMessage());
         }
     }
 }

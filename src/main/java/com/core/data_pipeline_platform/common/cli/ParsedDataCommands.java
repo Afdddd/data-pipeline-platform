@@ -73,6 +73,10 @@ public class ParsedDataCommands {
             result.append(String.format("File ID: %d\n", entity.getFile().getId()));
             result.append(String.format("File Name: %s\n", entity.getFile().getOriginName()));
             result.append(String.format("File Type: %s\n", entity.getFile().getFileType()));
+            result.append(String.format("Processing Status: %s\n", entity.getFile().getProcessingStatus()));
+            if (entity.getFile().getErrorMessage() != null) {
+                result.append(String.format("Error: %s\n", entity.getFile().getErrorMessage()));
+            }
             result.append(String.format("Data Count: %d개\n", data.size()));
 
             if (!data.isEmpty()) {

@@ -11,7 +11,7 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   servlet:
     multipart:
       max-file-size: 10MB      
