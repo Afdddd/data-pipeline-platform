@@ -1,30 +1,23 @@
-package com.core.data_pipeline_platform.domain.parse.dto;
+package com.core.data_pipeline_platform.domain.parse.dto
 
-import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
-import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity;
-import lombok.Builder;
-import lombok.Getter;
+import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity
 
-import java.util.List;
-import java.util.Map;
-
-@Getter
-@Builder
-public class ParsedDataResponse {
-    private Long id;
-    private Long fileId;
-    private String fileName;
-    private String fileType;
-    private List<Map<String, Object>> data;
-
-    public static ParsedDataResponse from(ParsedDataEntity entity, List<Map<String, Object>> parsedData) {
-        FileEntity file = entity.getFile();
-        return ParsedDataResponse.builder()
-            .id(entity.getId())
-            .fileId(file.getId())
-            .fileName(file.getOriginName())
-            .fileType(file.getFileType().name())
-            .data(parsedData)
-            .build();
+data class ParsedDataResponse(
+    val id: Long,
+    val fileId: Long,
+    val fileName: String,
+    val fileType: String,
+    val data: List<Map<String, Any>>
+) {
+    companion object {
+        fun from(entity: ParsedDataEntity, parsedData: List<Map<String, Any>>) : ParsedDataResponse {
+            return ParsedDataResponse(
+                id = entity.id,
+                fileId = entity.file.id,
+                fileName = entity.file.originName,
+                fileType = entity.file.fileType.name,
+                data = parsedData
+            )
+        }
     }
 }

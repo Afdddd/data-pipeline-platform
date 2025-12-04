@@ -1,5 +1,5 @@
-package com.core.data_pipeline_platform.domain.file.dto;
+package com.core.data_pipeline_platform.domain.file.dto
 
-public record ChunkUploadResponse(
-        int progress
-) {}
+data class ChunkUploadResponse(
+    val progress: Int
+)

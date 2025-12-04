@@ -1,7 +1,6 @@
-package com.core.data_pipeline_platform.domain.file.dto;
+package com.core.data_pipeline_platform.domain.file.dto
 
-public record ChunkUploadCancelResponse(
-        boolean success,
-        String message
-) {
-}
+data class ChunkUploadCancelResponse(
+    val success: Boolean,
+    val message: String?
+)
