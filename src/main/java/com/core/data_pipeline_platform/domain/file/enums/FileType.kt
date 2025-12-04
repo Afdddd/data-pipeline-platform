@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
 enum class FileType(
-    val extension: String?,
-    val description: String?,
-    val mimeType: String?
+    val extension: String,
+    val description: String,
+    val mimeType: String
 ) {
     JSON("json", "JSON 파일", "application/json"),
     CSV("csv", "CSV 파일", "text/csv"),

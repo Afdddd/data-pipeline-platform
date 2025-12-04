@@ -137,7 +137,7 @@ class FileUploadServiceTest {
         
         // save와 storage 메서드는 호출되지 않아야 함
         then(fileRepository).should(never()).save(any());
-        then(fileStorageService).should(never()).storeFile(any(), any());
+        then(fileStorageService).should(never()).storeFile((MultipartFile) any(), any());
     }
 
     @Test
@@ -197,7 +197,7 @@ class FileUploadServiceTest {
                 .storedName("uuid-stored")
                 .build();
 
-        given(fileStorageService.storeFile(any(), eq(FileType.JSON)))
+        given(fileStorageService.storeFile((MultipartFile) any(), eq(FileType.JSON)))
                 .willReturn(savedFile);
 
         ParsedDataEntity parsedData = ParsedDataEntity.builder()
@@ -223,7 +223,7 @@ class FileUploadServiceTest {
         assertThat(result).isEqualTo(1L);
 
         then(fileRepository).should().existsByOriginName("unique.json");
-        then(fileStorageService).should().storeFile(any(), eq(FileType.JSON));
+        then(fileStorageService).should().storeFile((MultipartFile) any(), eq(FileType.JSON));
         then(dataParsingService).should().parseToEntity(any(FileType.class), any(InputStream.class), any(FileEntity.class));
         then(parsedDataRepository).should().save(any(ParsedDataEntity.class));
     }
