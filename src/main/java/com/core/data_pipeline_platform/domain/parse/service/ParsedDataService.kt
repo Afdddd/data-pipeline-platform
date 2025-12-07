@@ -41,13 +41,13 @@ class ParsedDataService {
     /**
      * 파싱된 데이터의 JSON 데이터를 List<Map>으로 변환하여 반환
     </Map> */
-    fun getParsedDataAsMap(fileId: Long?): MutableList<MutableMap<String?, Any?>?>? {
+    fun getParsedDataAsMap(fileId: Long?): MutableList<MutableMap<String, Any>> {
         val parsedData = getParsedDataByFileId(fileId)
 
         try {
-            return objectMapper!!.readValue<MutableList<MutableMap<String?, Any?>?>?>(
+            return objectMapper!!.readValue(
                 parsedData.data,
-                object : TypeReference<MutableList<MutableMap<String?, Any?>?>?>() {})
+                object : TypeReference<MutableList<MutableMap<String, Any>>>() {})
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 변환 실패 : ${e.message}")
         }

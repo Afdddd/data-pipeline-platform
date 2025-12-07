@@ -21,7 +21,7 @@ class ParsedDataController(
      * 모든 파싱된 데이터 조회 (페이징)
      */
     @GetMapping
-    fun getAllParsedData(pageable: Pageable?): ResponseEntity<Page<ParsedDataEntity?>?> {
+    fun getAllParsedData(pageable: Pageable): ResponseEntity<Page<ParsedDataEntity?>?> {
         val parsedData = parsedDataService.getAllParsedData(pageable)
         return ResponseEntity.ok<Page<ParsedDataEntity?>?>(parsedData)
     }
@@ -34,7 +34,7 @@ class ParsedDataController(
         val entity = parsedDataService.getParsedDataByFileId(fileId)
         val data = parsedDataService.getParsedDataAsMap(fileId)
 
-        val response: ParsedDataResponse = ParsedDataResponse.from(entity!!, data)
+        val response: ParsedDataResponse = ParsedDataResponse.from(entity, data)
         return ResponseEntity.ok<ParsedDataResponse?>(response)
     }
 
