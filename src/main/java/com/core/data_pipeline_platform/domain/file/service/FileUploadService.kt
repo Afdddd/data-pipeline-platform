@@ -1,101 +1,99 @@
-package com.core.data_pipeline_platform.domain.file.service;
+package com.core.data_pipeline_platform.domain.file.service
 
-import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
-import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity;
-import com.core.data_pipeline_platform.domain.parse.repository.ParsedDataRepository;
-import com.core.data_pipeline_platform.domain.parse.service.DataParsingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
-import org.springframework.web.multipart.MultipartFile;
-import com.core.data_pipeline_platform.domain.file.enums.FileType;
-import com.core.data_pipeline_platform.domain.file.repository.FileRepository;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-
+import com.core.data_pipeline_platform.domain.file.entity.FileEntity
+import com.core.data_pipeline_platform.domain.file.enums.FileType
+import com.core.data_pipeline_platform.domain.file.enums.FileType.Companion.fromFileName
+import com.core.data_pipeline_platform.domain.file.enums.FileType.Companion.isSupported
+import com.core.data_pipeline_platform.domain.file.repository.FileRepository
+import com.core.data_pipeline_platform.domain.parse.entity.ParsedDataEntity
+import com.core.data_pipeline_platform.domain.parse.repository.ParsedDataRepository
+import com.core.data_pipeline_platform.domain.parse.service.DataParsingService
+import lombok.extern.slf4j.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
+import java.io.IOException
+import java.nio.file.Path
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class FileUploadService {
-
-    private final FileRepository fileRepository;
-    private final FileStorageService fileStorageService;
-    private final DataParsingService dataParsingService;
-    private final AsyncFileUploadService asyncFileUploadService;
-    private final ParsedDataRepository parsedDataRepository;
+class FileUploadService @Autowired constructor(
+    private val fileRepository: FileRepository,
+    private val fileStorageService: FileStorageService,
+    private val dataParsingService: DataParsingService,
+    private val asyncFileUploadService: AsyncFileUploadService,
+    private val parsedDataRepository: ParsedDataRepository
+){
 
     @Transactional
-    public Long uploadFile(MultipartFile file) {
+    fun uploadFile(file: MultipartFile): Long? {
+        val fileName = file.originalFilename
+        val fileType = validateAndGetFileType(fileName!!)
+        validateDuplicateFileName(fileName)
 
-        String fileName = file.getOriginalFilename();
-        FileType fileType = validateAndGetFileType(fileName);
-        validateDuplicateFileName(fileName);
+        val savedFile = saveFile(file, fileType)
+        parseAndSaveData(file, fileType, savedFile)
 
-        FileEntity savedFile = saveFile(file, fileType);
-        parseAndSaveData(file, fileType, savedFile);
-
-        return savedFile.getId();
+        return savedFile.id
     }
 
     @Transactional
-    public Long uploadFile(Path filePath) {
-        String fileName = filePath.getFileName().toString();
-        FileType fileType = validateAndGetFileType(fileName);
-        validateDuplicateFileName(fileName);
+    fun uploadFile(filePath: Path): Long? {
+        val fileName = filePath.fileName.toString()
+        val fileType = validateAndGetFileType(fileName)
+        validateDuplicateFileName(fileName)
 
-        FileEntity savedFile = saveFile(filePath, fileType);
-        
-        asyncFileUploadService.backgroundParse(filePath, fileType, savedFile.getId());
+        val savedFile = saveFile(filePath, fileType)
 
-        return savedFile.getId();
+        asyncFileUploadService.backgroundParse(filePath, fileType, savedFile.id)
+
+        return savedFile.id
     }
 
 
-    private FileType validateAndGetFileType(String fileName) {
-        if (!FileType.isSupported(fileName)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 형식입니다.");
+    private fun validateAndGetFileType(fileName: String): FileType {
+        if (!isSupported(fileName)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "지원하지 않는 형식입니다.")
         }
 
-        return FileType.fromFileName(fileName);
+        return fromFileName(fileName)
     }
 
-    private void validateDuplicateFileName(String fileName) {
+    private fun validateDuplicateFileName(fileName: String?) {
         if (fileRepository.existsByOriginName(fileName)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 존재하는 파일 이름입니다.");
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 존재하는 파일 이름입니다.")
         }
     }
 
-    private FileEntity saveFile(MultipartFile file, FileType fileType) {
+    private fun saveFile(file: MultipartFile, fileType: FileType): FileEntity {
         try {
-            return fileStorageService.storeFile(file, fileType);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
+            return fileStorageService.storeFile(file, fileType)
+        } catch (e: DataIntegrityViolationException) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.")
         }
     }
 
-    private FileEntity saveFile(Path filePath, FileType fileType) {
+    private fun saveFile(filePath: Path, fileType: FileType): FileEntity {
         try {
-            return fileStorageService.storeFile(filePath, fileType);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.");
+            return fileStorageService.storeFile(filePath, fileType)
+        } catch (e: DataIntegrityViolationException) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.")
         }
     }
 
-    private void parseAndSaveData(MultipartFile file, FileType fileType, FileEntity savedFile) {
-        try(InputStream inputStream = file.getInputStream()) {
-            ParsedDataEntity parsedDataEntity = dataParsingService
-                    .parseToEntity(fileType, inputStream, savedFile);
-            parsedDataRepository.save(parsedDataEntity);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패");
+    private fun parseAndSaveData(file: MultipartFile, fileType: FileType?, savedFile: FileEntity?) {
+        try {
+            file.getInputStream().use { inputStream ->
+                val parsedDataEntity = dataParsingService
+                    .parseToEntity(fileType, inputStream, savedFile)
+                parsedDataRepository.save<ParsedDataEntity?>(parsedDataEntity)
+            }
+        } catch (e: IOException) {
+            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패")
         }
     }
 }
