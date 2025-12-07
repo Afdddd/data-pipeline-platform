@@ -73,7 +73,7 @@ class FileUploadService @Autowired constructor(
         try {
             return fileStorageService.storeFile(file, fileType)
         } catch (e: DataIntegrityViolationException) {
-            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.")
+            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다. : ${e.message}")
         }
     }
 
@@ -81,7 +81,7 @@ class FileUploadService @Autowired constructor(
         try {
             return fileStorageService.storeFile(filePath, fileType)
         } catch (e: DataIntegrityViolationException) {
-            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다.")
+            throw ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 파일 이름입니다. : ${e.message}")
         }
     }
 
@@ -90,10 +90,10 @@ class FileUploadService @Autowired constructor(
             file.getInputStream().use { inputStream ->
                 val parsedDataEntity = dataParsingService
                     .parseToEntity(fileType, inputStream, savedFile)
-                parsedDataRepository.save<ParsedDataEntity?>(parsedDataEntity)
+                parsedDataRepository.save(parsedDataEntity)
             }
         } catch (e: IOException) {
-            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패")
+            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 파싱 실패 : ${e.message}")
         }
     }
 }

@@ -34,7 +34,7 @@ class FileStorageService @Autowired constructor(
         val directoryName: String = UUID.randomUUID().toString()
         val storedName: String = UUID.randomUUID().toString()
         val originName = file.originalFilename
-        val uploadPath = Paths.get(uploadDir, fileType.extension, directoryName)
+        val uploadPath = Paths.get(uploadDir!!, fileType.extension, directoryName)
 
         try {
             Files.createDirectories(uploadPath)
@@ -64,7 +64,7 @@ class FileStorageService @Autowired constructor(
         val directoryName: String = UUID.randomUUID().toString()
         val storedName: String = UUID.randomUUID().toString()
         val originName = filePath.fileName.toString()
-        val uploadPath = Paths.get(uploadDir, fileType.extension, directoryName)
+        val uploadPath = Paths.get(uploadDir!!, fileType.extension, directoryName)
 
         try {
             Files.createDirectories(uploadPath)

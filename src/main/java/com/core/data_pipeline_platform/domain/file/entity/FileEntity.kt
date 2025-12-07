@@ -3,10 +3,7 @@ package com.core.data_pipeline_platform.domain.file.entity
 import com.core.data_pipeline_platform.domain.file.enums.FileProcessingStatus
 import com.core.data_pipeline_platform.domain.file.enums.FileType
 import jakarta.persistence.*
-import lombok.AllArgsConstructor
-import lombok.Builder
 import lombok.Getter
-import lombok.NoArgsConstructor
 
 @Entity
 @Getter
