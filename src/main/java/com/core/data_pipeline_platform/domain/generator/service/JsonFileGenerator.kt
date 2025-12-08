@@ -1,48 +1,37 @@
-package com.core.data_pipeline_platform.domain.generator.service;
+package com.core.data_pipeline_platform.domain.generator.service
 
-import com.core.data_pipeline_platform.domain.file.enums.FileType;
-import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
-import com.core.data_pipeline_platform.domain.generator.model.SensorData;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import com.core.data_pipeline_platform.domain.file.enums.FileType
+import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest
+import com.core.data_pipeline_platform.domain.generator.model.SensorData
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
-public class JsonFileGenerator implements FileGenerator{
+class JsonFileGenerator(private val objectMapper: ObjectMapper) : FileGenerator {
 
-    private final ObjectMapper objectMapper;
+    override fun generateFile(request: GenerateRequest): ByteArray {
+        val sensorDataList: MutableList<SensorData> = ArrayList()
 
-    public JsonFileGenerator(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public byte[] generateFile(GenerateRequest request) {
-        List<SensorData> sensorDataList = new ArrayList<>();
-
-        for (int i = 0; i < request.recordCount(); i++) {
-            sensorDataList.add(SensorData.builder()
-                    .sensorId("SENSOR_"+i)
-                    .value(Math.random()*100)
-                    .timestamp(LocalDateTime.now().toString())
-                    .status("NORMAL")
-                    .build());
+        for (i in 0..<request.recordCount) {
+            sensorDataList.add(
+                SensorData(
+                    sensorId = "SENSOR_$i",
+                    value = Math.random() * 100,
+                    timestamp = LocalDateTime.now().toString(),
+                    status = "NORMAL"
+                )
+            )
         }
 
-        try{
-            return objectMapper.writeValueAsBytes(sensorDataList);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("JSON 생성 실패", e);
+        try {
+            return objectMapper.writeValueAsBytes(sensorDataList)
+        } catch (e: JsonProcessingException) {
+            throw RuntimeException("JSON 생성 실패", e)
         }
-
     }
 
-    @Override
-    public FileType getSupportedFileType() {
-        return FileType.JSON;
-    }
+    override val supportedFileType: FileType?
+        get() = FileType.JSON
 }

@@ -1,50 +1,42 @@
-package com.core.data_pipeline_platform.domain.generator.service;
+package com.core.data_pipeline_platform.domain.generator.service
 
-import com.core.data_pipeline_platform.domain.file.enums.FileType;
-import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest;
-import com.core.data_pipeline_platform.domain.generator.model.SensorData;
-import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import com.core.data_pipeline_platform.domain.file.enums.FileType
+import com.core.data_pipeline_platform.domain.generator.dto.GenerateRequest
+import com.core.data_pipeline_platform.domain.generator.model.SensorData
+import org.springframework.stereotype.Component
+import java.nio.charset.StandardCharsets
+import java.time.LocalDateTime
 
 @Component
-public class CsvFileGenerator implements FileGenerator{
+class CsvFileGenerator : FileGenerator {
+    override fun generateFile(request: GenerateRequest): ByteArray {
+        val csvBuilder = StringBuilder()
+        val fields = SensorData::class.java.getDeclaredFields()
 
-    @Override
-    public byte[] generateFile(GenerateRequest request) {
-
-        StringBuilder csvBuilder = new StringBuilder();
-        Field[] fields = SensorData.class.getDeclaredFields();
-
-        for (int i = 0; i < fields.length; i++) {
-            csvBuilder.append(fields[i].getName());
-            if (i < fields.length - 1) {
-                csvBuilder.append(",");
+        for (i in fields.indices) {
+            csvBuilder.append(fields[i].name)
+            if (i < fields.size - 1) {
+                csvBuilder.append(",")
             }
         }
-        csvBuilder.append("\n");
+        csvBuilder.append("\n")
 
 
-        for (int i = 0; i < request.recordCount(); i++) {
+        for (i in 0..<request.recordCount) {
             csvBuilder.append("SENSOR_")
-                    .append(i)
-                    .append(",")
-                    .append(Math.random()*100)
-                    .append(",")
-                    .append(LocalDateTime.now())
-                    .append(",")
-                    .append("Status")
-                    .append("\n");
-
+                .append(i)
+                .append(",")
+                .append(Math.random() * 100)
+                .append(",")
+                .append(LocalDateTime.now())
+                .append(",")
+                .append("Status")
+                .append("\n")
         }
 
-        return csvBuilder.toString().getBytes(StandardCharsets.UTF_8);
+        return csvBuilder.toString().toByteArray(StandardCharsets.UTF_8)
     }
 
-    @Override
-    public FileType getSupportedFileType() {
-        return FileType.CSV;
-    }
+    override val supportedFileType: FileType?
+        get() = FileType.CSV
 }

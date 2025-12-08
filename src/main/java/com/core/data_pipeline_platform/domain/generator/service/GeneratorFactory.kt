@@ -1,33 +1,21 @@
-package com.core.data_pipeline_platform.domain.generator.service;
+package com.core.data_pipeline_platform.domain.generator.service
 
-import com.core.data_pipeline_platform.domain.file.enums.FileType;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.core.data_pipeline_platform.domain.file.enums.FileType
+import org.springframework.stereotype.Component
+import java.util.function.Function
+import java.util.stream.Collectors
 
 @Component
-public class GeneratorFactory {
+class GeneratorFactory(generatorList: MutableList<FileGenerator?>) {
+    private val generators: MutableMap<FileType, FileGenerator> = generatorList.stream()
+        .collect(
+            Collectors.toMap(
+                FileGenerator::supportedFileType,
+                Function { fileGenerator: FileGenerator? -> fileGenerator }
+            ))
 
-    private final Map<FileType, FileGenerator> generators;
-
-    public GeneratorFactory(List<FileGenerator> generatorList) {
-        this.generators = generatorList.stream()
-                .collect(Collectors.toMap(
-                    FileGenerator::getSupportedFileType,
-        fileGenerator -> fileGenerator
-                ));
-
-    }
-
-    public FileGenerator getFileGenerator(FileType fileType) {
-        FileGenerator fileGenerator = generators.get(fileType);
-        if (fileGenerator == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 파일형식입니다.");
-        }
-        return fileGenerator;
+    fun getFileGenerator(fileType: FileType): FileGenerator {
+        val fileGenerator: FileGenerator = generators[fileType]!!
+        return fileGenerator
     }
 }
