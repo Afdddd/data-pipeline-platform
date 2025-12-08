@@ -24,10 +24,10 @@ class DataParsingService {
 
             val jsonData = objectMapper!!.writeValueAsString(maps)
 
-            return ParsedDataEntity.builder()
-                .file(file)
-                .data(jsonData)
-                .build()
+            return ParsedDataEntity(
+                file = file,
+                data = jsonData,
+            )
         } catch (e: JsonProcessingException) {
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파싱 실패 : ${e.message}")
         }

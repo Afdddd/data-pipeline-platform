@@ -1,26 +1,19 @@
-package com.core.data_pipeline_platform.domain.parse.entity;
+package com.core.data_pipeline_platform.domain.parse.entity
 
-import com.core.data_pipeline_platform.domain.file.entity.FileEntity;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.core.data_pipeline_platform.domain.file.entity.FileEntity
+import jakarta.persistence.*
 
 @Entity
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-public class ParsedDataEntity {
-
+class ParsedDataEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long? = null,
 
     @OneToOne
-    private FileEntity file;
+    var file: FileEntity,
 
     @Column(columnDefinition = "json", nullable = false)
-    private String data;
+    var data: String
+){
+
 }

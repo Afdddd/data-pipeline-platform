@@ -13,18 +13,17 @@ class FileEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-
     @Column(name = "origin_name", nullable = false, length = 255, unique = true)
-    var originName: String? = null,
+    var originName: String,
 
     @Column(name = "directory_name", nullable = false)
-    var directoryName: String? = null,
+    var directoryName: String,
 
     @Column(name = "stored_name", nullable = false, length = 255)
-    var storedName: String? = null,
+    var storedName: String,
 
     @Enumerated(EnumType.STRING)
-    var fileType: FileType? = null
+    var fileType: FileType
 ) {
 
     @Enumerated(EnumType.STRING)
