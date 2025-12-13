@@ -1,36 +1,35 @@
-package com.core.data_pipeline_platform.domain.file.controller;
+package com.core.data_pipeline_platform.domain.file.controller
 
-import com.core.data_pipeline_platform.domain.file.dto.*;
-import com.core.data_pipeline_platform.domain.file.service.ChunkUploadService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.core.data_pipeline_platform.domain.file.dto.*
+import com.core.data_pipeline_platform.domain.file.service.ChunkUploadService
+import jakarta.validation.Valid
+import lombok.RequiredArgsConstructor
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/files/chunk")
 @RequiredArgsConstructor
-public class ChunkUploadController {
-
-    private final ChunkUploadService chunkUploadService;
+class ChunkUploadController {
+    private val chunkUploadService: ChunkUploadService? = null
 
     @PostMapping("/start")
-    public ResponseEntity<ChunkUploadStartResponse> startChunkUpload(@RequestBody @Valid ChunkUploadStartRequest request) {
-        return ResponseEntity.ok(chunkUploadService.startUpload(request));
+    fun startChunkUpload(@RequestBody request: @Valid ChunkUploadStartRequest): ResponseEntity<ChunkUploadStartResponse?> {
+        return ResponseEntity.ok<ChunkUploadStartResponse?>(chunkUploadService!!.startUpload(request))
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<ChunkUploadResponse> uploadChunk(@RequestBody @Valid ChunkUploadRequest request) {
-        return ResponseEntity.ok(chunkUploadService.upload(request));
+    fun uploadChunk(@RequestBody request: @Valid ChunkUploadRequest): ResponseEntity<ChunkUploadResponse?> {
+        return ResponseEntity.ok<ChunkUploadResponse?>(chunkUploadService!!.upload(request))
     }
 
     @PostMapping("/complete/{sessionId}")
-    public ResponseEntity<ChunkUploadCompleteResponse> completeChunkUpload(@PathVariable String sessionId) {
-        return ResponseEntity.ok(chunkUploadService.completeUpload(sessionId));
+    fun completeChunkUpload(@PathVariable sessionId: String?): ResponseEntity<ChunkUploadCompleteResponse?> {
+        return ResponseEntity.ok<ChunkUploadCompleteResponse?>(chunkUploadService!!.completeUpload(sessionId))
     }
 
     @PostMapping("/cancel/{sessionId}")
-    public ResponseEntity<ChunkUploadCancelResponse> cancelChunkUpload(@PathVariable String sessionId) {
-        return ResponseEntity.ok(chunkUploadService.cancelUpload(sessionId));
+    fun cancelChunkUpload(@PathVariable sessionId: String?): ResponseEntity<ChunkUploadCancelResponse?> {
+        return ResponseEntity.ok<ChunkUploadCancelResponse?>(chunkUploadService!!.cancelUpload(sessionId))
     }
 }

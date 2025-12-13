@@ -1,13 +1,12 @@
-package com.core.data_pipeline_platform;
+package com.core.data_pipeline_platform
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-public class DataPipelinePlatformApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(DataPipelinePlatformApplication.class, args);
-	}
-
+object DataPipelinePlatformApplication {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        SpringApplication.run(DataPipelinePlatformApplication::class.java, *args)
+    }
 }

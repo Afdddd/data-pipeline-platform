@@ -49,7 +49,7 @@ class FileUploadService @Autowired constructor(
 
         val savedFile = saveFile(filePath, fileType)
 
-        asyncFileUploadService.backgroundParse(filePath, fileType, savedFile.id)
+        asyncFileUploadService.backgroundParse(filePath, fileType, savedFile.id!!)
 
         return savedFile.id
     }
@@ -89,7 +89,7 @@ class FileUploadService @Autowired constructor(
         try {
             file.getInputStream().use { inputStream ->
                 val parsedDataEntity = dataParsingService
-                    .parseToEntity(fileType, inputStream, savedFile)
+                    .parseToEntity(fileType!!, inputStream, savedFile!!)
                 parsedDataRepository.save(parsedDataEntity)
             }
         } catch (e: IOException) {

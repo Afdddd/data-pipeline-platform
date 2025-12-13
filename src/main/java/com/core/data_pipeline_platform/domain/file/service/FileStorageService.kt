@@ -110,7 +110,7 @@ class FileStorageService @Autowired constructor(
 
         try {
             FileOutputStream(tempFile.toFile()).use { fos ->
-                for (i in 0..<session.totalChunks) {
+                for (i in 0..<session.totalChunks!!) {
                     val chunkFile = Paths.get(chunkUploadDir, session.sessionId, "chunk_$i")
                     if (Files.exists(chunkFile)) {
                         Files.copy(chunkFile, fos)
@@ -139,18 +139,18 @@ class FileStorageService @Autowired constructor(
 
 
         // 최종 파일을 새로운 위치로 이동
-        val uploadPath = Paths.get(uploadDir!!, session.fileType.extension, directoryName)
+        val uploadPath = Paths.get(uploadDir!!, session.fileType!!.extension, directoryName)
 
         try {
             Files.createDirectories(uploadPath)
-            val targetLocation = uploadPath.resolve(storedName + "." + session.fileType.extension)
+            val targetLocation = uploadPath.resolve(storedName + "." + session.fileType!!.extension)
             Files.move(finalFile, targetLocation, StandardCopyOption.REPLACE_EXISTING)
 
             return FileEntity(
                 storedName = storedName,
                 directoryName = directoryName,
-                fileType = session.fileType,
-                originName = originName
+                fileType = session.fileType!!,
+                originName = originName!!
             )
         } catch (e: IOException) {
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 엔티티 생성 실패 : ${e.message}")
